@@ -11,6 +11,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Input from "../../components/Input ";
 import Button from "../../components/Button";
 import supabase from "../../supabaseClient";
@@ -20,13 +21,31 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) alert(error.message);
-    else alert("Login successful!");
-    navigation.navigate("Home");
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      if (data.session) {
+        await AsyncStorage.setItem(
+          "supabase_session",
+          JSON.stringify(data.session)
+        );
+        alert("Login successful!");
+        navigation.replace("Drawer");
+      } else {
+        console.warn("No session returned from Supabase.");
+      }
+    } catch (err) {
+      console.error("Login error:", err.message);
+      alert("An unexpected error occurred.");
+    }
   };
 
   return (
