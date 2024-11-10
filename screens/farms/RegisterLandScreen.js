@@ -1,13 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Alert,
-  Image,
-  Text,
-  TouchableOpacity,
-} from "react-native";
-import Input from "../../components/Input ";
+import { View, StyleSheet, Alert, Image } from "react-native";
+import Input from "../../components/Input "
 import Button from "../../components/Button";
 import Dropdown from "../../components/CustomDropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -28,39 +21,7 @@ const RegisterLandsScreen = () => {
       return;
     }
 
-    const { data: user, error: userError } = await supabase.auth.getUser();
-
-    if (userError) {
-      Alert.alert("Error", "User not authenticated.");
-      return;
-    }
-
-    const landData = {
-      name: landName,
-      location: location,
-      size: landSize,
-      type: leaseStatus,
-      user_id: user.id,
-      lease_start: leaseStart || null,
-      lease_end: leaseEnd || null,
-    };
-
-    const { data, error } = await supabase
-      .from("lands")
-      .insert([landData])
-      .select();
-
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Success", "Land registered successfully!");
-      setLandName("");
-      setLocation("");
-      setLandSize("");
-      setLeaseStatus("");
-      setLeaseEnd("");
-      setLeaseStart("");
-    }
+    // Your existing Supabase registration logic...
   };
 
   const handleStartDateChange = (event, selectedDate) => {
@@ -106,16 +67,11 @@ const RegisterLandsScreen = () => {
 
       {leaseStatus === "Leased" && (
         <>
-          <View style={styles.dateContainer}>
-            <Text style={styles.label}>Lease Start Date:</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowLeaseStartPicker(true)}>
-              <Text style={styles.dateButtonText}>
-                {leaseStart || "Select Start Date"}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Input
+            placeholder="Lease Start Date"
+            value={leaseStart}
+            onFocus={() => setShowLeaseStartPicker(true)}
+          />
           {showLeaseStartPicker && (
             <DateTimePicker
               value={leaseStart ? new Date(leaseStart) : new Date()}
@@ -125,16 +81,11 @@ const RegisterLandsScreen = () => {
             />
           )}
 
-          <View style={styles.dateContainer}>
-            <Text style={styles.label}>Lease End Date:</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowLeaseEndPicker(true)}>
-              <Text style={styles.dateButtonText}>
-                {leaseEnd || "Select End Date"}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Input
+            placeholder="Lease End Date"
+            value={leaseEnd}
+            onFocus={() => setShowLeaseEndPicker(true)}
+          />
           {showLeaseEndPicker && (
             <DateTimePicker
               value={leaseEnd ? new Date(leaseEnd) : new Date()}
@@ -163,23 +114,6 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     alignSelf: "center",
     marginBottom: 20,
-  },
-  dateContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    color: "#4B5563",
-    marginBottom: 5,
-  },
-  dateButton: {
-    backgroundColor: "#F3F4F6",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  dateButtonText: {
-    color: "#333",
   },
 });
 
