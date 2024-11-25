@@ -9,27 +9,25 @@ import {
 
 const LandManagementScreen = ({ navigation }) => {
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* <Text style={styles.title}>Land Management</Text> */}
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {/* <Text style={styles.title}>Land Management</Text> */}
 
-        <TouchableOpacity
-          style={styles.optionButton}
-          onPress={() => navigation.navigate("Register Land")}>
-          <Text style={styles.buttonText}>Register Lands</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.optionButton}
-          onPress={() => alert("Leased Lands - Coming Soon!")}>
-          <Text style={styles.buttonText}>Leased Lands</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.optionButton}
-          onPress={() => alert("Owned Lands - Coming Soon!")}>
-          <Text style={styles.buttonText}>Owned Lands</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
+      <TouchableOpacity
+        style={styles.optionButton}
+        onPress={() => navigation.navigate("Register Land")}>
+        <Text style={styles.buttonText}>Register Lands</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.optionButton}
+        onPress={() => navigation.navigate("Leased Land")}>
+        <Text style={styles.buttonText}>Leased Lands</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.optionButton}
+        onPress={() => navigation.navigate("Owned Land")}>
+        <Text style={styles.buttonText}>Owned Lands</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
@@ -38,7 +36,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9F9FB",
     alignItems: "center",
-    paddingTop: 20,
+    paddingTop: 10,
   },
   title: {
     fontSize: 28,
@@ -48,20 +46,18 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 30,
+    padding: 10,
+    margin: 10,
   },
   optionButton: {
-    width: 350,
+    width: 320,
     height: 200,
     padding: 15,
     backgroundColor: "#5C2D91",
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 10,
+    marginVertical: 5,
   },
   buttonText: {
     color: "#FFF",

@@ -9,6 +9,8 @@ import HomeScreen from "./screens/Home/HomeScreen";
 import LandManagementScreen from "./screens/farms/LandManagementScreen";
 import ReportsScreen from "./screens/Reports/ReportsScreen";
 import RegisterLandsScreen from "./screens/farms/RegisterLandScreen";
+import LeasedLandsScreen from "./screens/farms/LeasedLandScreen";
+import OwnedLandScreen from "./screens/farms/OwnedLandScreen";
 import CustomHeader from "./components/CustomHeader";
 import { PaperProvider } from "react-native-paper";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
@@ -74,6 +76,34 @@ const RegisterLandStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
+const LeasedLandsStack = ({ navigation }) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Leased Lands"
+      component={LeasedLandsScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Leased Lands" navigation={navigation} />
+        ),
+      }}
+    />
+  </Stack.Navigator>
+);
+
+const OwnedLandsStack = ({ navigation }) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Owned Lands"
+      component={OwnedLandScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Owned Lands" navigation={navigation} />
+        ),
+      }}
+    />
+  </Stack.Navigator>
+);
+
 const DrawerNavigator = () => (
   <Drawer.Navigator initialRouteName="Home">
     <Drawer.Screen
@@ -94,6 +124,16 @@ const DrawerNavigator = () => (
     <Drawer.Screen
       name="Register Land"
       component={RegisterLandStack}
+      options={{ headerShown: false }}
+    />
+    <Drawer.Screen
+      name="Leased Lands"
+      component={LeasedLandsStack}
+      options={{ headerShown: false }}
+    />
+    <Drawer.Screen
+      name="Owned Lands"
+      component={OwnedLandsStack}
       options={{ headerShown: false }}
     />
   </Drawer.Navigator>
