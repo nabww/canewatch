@@ -50,5 +50,5 @@ We welcome contributions to CaneWatch! To contribute:
 3. Commit and push your changes.
 4. Submit a pull request.
 ## **License**
-This project is licensed under the MIT License. Feel free to use and adapt it for
-personal or commercial purposes.
+This project is licensed under the GNU General Public License (GPL). Feel free to use and adapt it for
+personal or commercial purposes as long as you keep any of your iterations OPENSOURCE. Thanks!
