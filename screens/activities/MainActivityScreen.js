@@ -83,18 +83,19 @@ const MainActivityScreen = () => {
       <View style={styles.pickerWrapper}>
         <Picker
           selectedValue={selectedFarm}
-          onValueChange={(itemValue) => setSelectedFarm(itemValue)}>
+          onValueChange={(itemValue) => setSelectedFarm(itemValue)}
+          style={styles.picker}>
           <Picker.Item label="Select a farm" value="" />
           {farms.map((farm) => (
             <Picker.Item
               key={farm.id}
               label={farm.landName}
               value={farm.id}
-              style={
+              style={[
                 selectedFarm === farm.id
                   ? { color: "#5C2D91", fontWeight: "bold" }
-                  : null
-              }
+                  : { color: "#000" },
+              ]}
             />
           ))}
         </Picker>
@@ -155,8 +156,8 @@ const styles = StyleSheet.create({
   },
   pickerWrapper: {
     marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#ccc",
+    // borderWidth: 1,
+    // borderColor: "#ccc",
     borderRadius: 5,
     backgroundColor: "#fff",
   },

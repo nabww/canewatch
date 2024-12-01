@@ -9,10 +9,8 @@ import {
   RefreshControl,
 } from "react-native";
 import supabase from "../../supabaseClient";
-import Button from "../../components/Button";
-import { ScrollView } from "react-native-gesture-handler";
 
-const LeasedLandsScreen = () => {
+const LeasedLandScreen = () => {
   const [lands, setLands] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +31,7 @@ const LeasedLandsScreen = () => {
       }
 
       if (data.length === 0) {
-        Alert.alert("No Data", "No leased lands found.");
+        Alert.alert("No Data", "No Leased lands found.");
       }
 
       setLands(data);
@@ -42,6 +40,12 @@ const LeasedLandsScreen = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onRefresh = async () => {
+    setLoading(true);
+    await fetchLeasedLands();
+    setLoading(false);
   };
 
   const renderLandItem = ({ item }) => (
@@ -62,25 +66,16 @@ const LeasedLandsScreen = () => {
     );
   }
 
-  const onRefresh = async () => {
-    setLoading(true);
-    await fetchLeasedLands();
-    setLoading(false);
-  };
-
   return (
-    <ScrollView
-      style={styles.container}
+    <FlatList
+      data={lands}
+      keyExtractor={(item) => item.id}
+      renderItem={renderLandItem}
+      contentContainerStyle={styles.list}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-      }>
-      <FlatList
-        data={lands}
-        keyExtractor={(item) => item.id}
-        renderItem={renderLandItem}
-        contentContainerStyle={styles.list}
-      />
-    </ScrollView>
+      }
+    />
   );
 };
 
@@ -100,10 +95,11 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 16,
-    marginVertical: 8,
+    marginVertical: 5,
     borderRadius: 8,
     backgroundColor: "#ffffff",
     elevation: 3,
+    margin: 6,
   },
   landName: {
     fontSize: 18,
@@ -112,4 +108,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LeasedLandsScreen;
+export default LeasedLandScreen;

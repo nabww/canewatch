@@ -7,10 +7,8 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  ScrollView,
 } from "react-native";
 import supabase from "../../supabaseClient";
-import Button from "../../components/Button";
 
 const OwnedLandScreen = () => {
   const [lands, setLands] = useState([]);
@@ -33,7 +31,7 @@ const OwnedLandScreen = () => {
       }
 
       if (data.length === 0) {
-        Alert.alert("No Data", "No leased lands found.");
+        Alert.alert("No Data", "No owned lands found.");
       }
 
       setLands(data);
@@ -69,19 +67,15 @@ const OwnedLandScreen = () => {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
+    <FlatList
+      data={lands}
+      keyExtractor={(item) => item.id}
+      renderItem={renderLandItem}
+      contentContainerStyle={styles.list}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={onRefresh} />
-      }>
-      <FlatList
-        data={lands}
-        keyExtractor={(item) => item.id}
-        renderItem={renderLandItem}
-        contentContainerStyle={styles.list}
-      />
-      {/* <Button title="Refresh" onPress={fetchOwnedLands} /> */}
-    </ScrollView>
+      }
+    />
   );
 };
 
@@ -101,10 +95,11 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 16,
-    marginVertical: 8,
+    marginVertical: 6,
     borderRadius: 8,
     backgroundColor: "#ffffff",
     elevation: 3,
+    margin: 5,
   },
   landName: {
     fontSize: 18,
