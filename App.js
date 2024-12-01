@@ -9,8 +9,7 @@ import HomeScreen from "./screens/Home/HomeScreen";
 import LandManagementScreen from "./screens/farms/LandManagementScreen";
 import ReportsScreen from "./screens/Reports/ReportsScreen";
 import RegisterLandsScreen from "./screens/farms/RegisterLandScreen";
-import LeasedLandsScreen from "./screens/farms/LeasedLandScreen";
-import OwnedLandScreen from "./screens/farms/OwnedLandScreen";
+import LeasedOwnedToggleScreen from "./screens/farms/LeasedOwnedToggleScreen";
 import CustomHeader from "./components/CustomHeader";
 import { PaperProvider } from "react-native-paper";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
@@ -79,29 +78,13 @@ const RegisterLandStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
-const LeasedLandsStack = ({ navigation }) => (
+const LandsStack = ({ navigation }) => (
   <Stack.Navigator>
     <Stack.Screen
       name="Leased Lands"
-      component={LeasedLandsScreen}
+      component={LeasedOwnedToggleScreen}
       options={{
-        header: () => (
-          <CustomHeader title="Leased Lands" navigation={navigation} />
-        ),
-      }}
-    />
-  </Stack.Navigator>
-);
-
-const OwnedLandsStack = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
-      name="Owned Lands"
-      component={OwnedLandScreen}
-      options={{
-        header: () => (
-          <CustomHeader title="Owned Lands" navigation={navigation} />
-        ),
+        header: () => <CustomHeader title="Lands" navigation={navigation} />,
       }}
     />
   </Stack.Navigator>
@@ -128,11 +111,11 @@ const DrawerNavigator = () => (
       component={HomeStack}
       options={{ headerShown: false }}
     />
-    <Drawer.Screen
+    {/* <Drawer.Screen
       name="Land Management"
       component={LandManagementStack}
       options={{ headerShown: false }}
-    />
+    /> */}
     <Drawer.Screen
       name="Register Land"
       component={RegisterLandStack}
@@ -144,13 +127,8 @@ const DrawerNavigator = () => (
       options={{ headerShown: false }}
     />
     <Drawer.Screen
-      name="Leased Lands"
-      component={LeasedLandsStack}
-      options={{ headerShown: false }}
-    />
-    <Drawer.Screen
-      name="Owned Lands"
-      component={OwnedLandsStack}
+      name="Lands"
+      component={LandsStack}
       options={{ headerShown: false }}
     />
     <Drawer.Screen

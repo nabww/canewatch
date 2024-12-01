@@ -37,7 +37,7 @@ const LoginScreen = ({ navigation }) => {
           "supabase_session",
           JSON.stringify(data.session)
         );
-        alert("Login successful!");
+        // alert("Login successful!");
         navigation.replace("Drawer");
       } else {
         console.warn("No session returned from Supabase.");

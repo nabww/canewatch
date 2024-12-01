@@ -10,31 +10,22 @@ import {
 } from "react-native";
 import supabase from "../../supabaseClient";
 
-const LeasedLandScreen = () => {
+const LandList = ({ type }) => {
   const [lands, setLands] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetchLeasedLands();
-  }, []);
-
-  const fetchLeasedLands = async () => {
+  const fetchLands = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from("lands")
         .select("*")
-        .eq("type", "Leased");
+        .eq("type", type);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data.length === 0) {
-        Alert.alert("No Data", "No Leased lands found.");
-      }
-
-      setLands(data);
+      setLands(data || []);
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -43,10 +34,17 @@ const LeasedLandScreen = () => {
   };
 
   const onRefresh = async () => {
-    setLoading(true);
-    await fetchLeasedLands();
-    setLoading(false);
+    setRefreshing(true);
+    try {
+      await fetchLands();
+    } finally {
+      setRefreshing(false);
+    }
   };
+
+  useEffect(() => {
+    fetchLands();
+  }, [type]);
 
   const renderLandItem = ({ item }) => (
     <View style={styles.card}>
@@ -58,10 +56,10 @@ const LeasedLandScreen = () => {
     </View>
   );
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#6200ee" />
+        <ActivityIndicator size="large" color="#5C2D91" />
       </View>
     );
   }
@@ -71,27 +69,21 @@ const LeasedLandScreen = () => {
       data={lands}
       keyExtractor={(item) => item.id}
       renderItem={renderLandItem}
-      contentContainerStyle={styles.list}
       refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      ListEmptyComponent={
+        <Text style={styles.emptyMessage}>No {type} lands found.</Text>
       }
     />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#f9f9f9",
-  },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  list: {
-    paddingBottom: 16,
   },
   card: {
     padding: 16,
@@ -106,6 +98,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
+  emptyMessage: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+    color: "gray",
+  },
 });
 
-export default LeasedLandScreen;
+export default LandList;
