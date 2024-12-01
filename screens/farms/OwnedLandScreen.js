@@ -6,6 +6,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  RefreshControl,
+  ScrollView,
 } from "react-native";
 import supabase from "../../supabaseClient";
 import Button from "../../components/Button";
@@ -42,6 +44,12 @@ const OwnedLandScreen = () => {
     }
   };
 
+  const onRefresh = async () => {
+    setLoading(true);
+    await fetchOwnedLands();
+    setLoading(false);
+  };
+
   const renderLandItem = ({ item }) => (
     <View style={styles.card}>
       <Text style={styles.landName}>{item.landName}</Text>
@@ -61,15 +69,19 @@ const OwnedLandScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+      }>
       <FlatList
         data={lands}
         keyExtractor={(item) => item.id}
         renderItem={renderLandItem}
         contentContainerStyle={styles.list}
       />
-      <Button title="Refresh" onPress={fetchOwnedLands} />
-    </View>
+      {/* <Button title="Refresh" onPress={fetchOwnedLands} /> */}
+    </ScrollView>
   );
 };
 

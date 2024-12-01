@@ -1,162 +1,122 @@
 import React, { useState } from "react";
 import {
   View,
-  StyleSheet,
-  Alert,
-  Image,
   Text,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Image,
+  StyleSheet,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Input from "../../components/Input ";
 import Button from "../../components/Button";
-import Dropdown from "../../components/CustomDropdown";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { ScrollView } from "react-native-gesture-handler";
+import supabase from "../../supabaseClient";
 
-const RegisterLandsScreen = () => {
-  const [landName, setLandName] = useState("");
-  const [landSize, setLandSize] = useState("");
-  const [location, setLocation] = useState("");
-  const [leaseStatus, setLeaseStatus] = useState("");
-  const [leaseStart, setLeaseStart] = useState("");
-  const [leaseEnd, setLeaseEnd] = useState("");
-  const [showLeaseStartPicker, setShowLeaseStartPicker] = useState(false);
-  const [showLeaseEndPicker, setShowLeaseEndPicker] = useState(false);
+const RegisterScreen = ({ navigation }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegisterLand = async () => {
-    if (!landName || !location || !landSize || !leaseStatus) {
-      Alert.alert("Error", "Please fill in all fields.");
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
       return;
     }
 
-    const { data: user, error: userError } = await supabase.auth.getUser();
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-    if (userError) {
-      Alert.alert("Error", "User not authenticated.");
-      return;
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      if (data.user) {
+        alert(
+          "Registration successful! Please check your email for verification."
+        );
+        navigation.navigate("Login");
+      } else {
+        console.warn("No user data returned from Supabase.");
+      }
+    } catch (err) {
+      console.error("Registration error:", err.message);
+      alert("An unexpected error occurred.");
     }
-
-    const landData = {
-      name: landName,
-      location: location,
-      size: landSize,
-      type: leaseStatus,
-      user_id: user.id,
-      lease_start: leaseStart || null,
-      lease_end: leaseEnd || null,
-    };
-
-    const { data, error } = await supabase
-      .from("lands")
-      .insert([landData])
-      .select();
-
-    if (error) {
-      Alert.alert("Error", error.message);
-    } else {
-      Alert.alert("Success", "Land registered successfully!");
-      setLandName("");
-      setLocation("");
-      setLandSize("");
-      setLeaseStatus("");
-      setLeaseEnd("");
-      setLeaseStart("");
-    }
-  };
-
-  const handleStartDateChange = (event, selectedDate) => {
-    setShowLeaseStartPicker(false);
-    if (selectedDate) setLeaseStart(selectedDate.toISOString().split("T")[0]);
-  };
-
-  const handleEndDateChange = (event, selectedDate) => {
-    setShowLeaseEndPicker(false);
-    if (selectedDate) setLeaseEnd(selectedDate.toISOString().split("T")[0]);
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Image source={require("../../assets/logo.png")} style={styles.logo} />
-      <Input
-        placeholder="Land Name"
-        value={landName}
-        onChangeText={setLandName}
-      />
-      <Input
-        placeholder="Land Size (in acres)"
-        value={landSize}
-        onChangeText={setLandSize}
-      />
-      <Input
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-      />
-      <Dropdown
-        label="Lease Status"
-        options={["Owned", "Leased"]}
-        value={leaseStatus}
-        onSelect={(value) => {
-          setLeaseStatus(value);
-          if (value !== "Leased") {
-            setLeaseStart("");
-            setLeaseEnd("");
-          }
-        }}
-      />
-
-      {leaseStatus === "Leased" && (
-        <>
-          <View style={styles.dateContainer}>
-            <Text style={styles.label}>Lease Start Date:</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowLeaseStartPicker(true)}>
-              <Text style={styles.dateButtonText}>
-                {leaseStart || "Select Start Date"}
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          bounces={false}>
+          <View style={styles.innerContainer}>
+            <Text style={styles.title}>Register for CaneWatch</Text>
+            <Image
+              source={require("../../assets/logo.png")}
+              style={styles.logo}
+            />
+            <Input placeholder="Email" value={email} onChangeText={setEmail} />
+            <Input
+              placeholder="Password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            <Input
+              placeholder="Confirm Password"
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+            <Button title="Register" onPress={handleRegister} />
+            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+              <Text style={styles.loginText}>
+                Already have an account? Login
               </Text>
             </TouchableOpacity>
           </View>
-          {showLeaseStartPicker && (
-            <DateTimePicker
-              value={leaseStart ? new Date(leaseStart) : new Date()}
-              mode="date"
-              display="default"
-              onChange={handleStartDateChange}
-            />
-          )}
-
-          <View style={styles.dateContainer}>
-            <Text style={styles.label}>Lease End Date:</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowLeaseEndPicker(true)}>
-              <Text style={styles.dateButtonText}>
-                {leaseEnd || "Select End Date"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          {showLeaseEndPicker && (
-            <DateTimePicker
-              value={leaseEnd ? new Date(leaseEnd) : new Date()}
-              mode="date"
-              display="default"
-              onChange={handleEndDateChange}
-            />
-          )}
-        </>
-      )}
-
-      <Button title="Save" onPress={handleRegisterLand} />
-    </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#F9F9FB",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  innerContainer: {
+    justifyContent: "center",
+    padding: 20,
+    flex: 1,
+  },
+  title: {
+    fontSize: 36,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#5C2D91",
+    marginBottom: 20,
+  },
+  loginText: {
+    textAlign: "center",
+    color: "#6B3FA0",
+    marginTop: 20,
   },
   logo: {
     width: 150,
@@ -165,23 +125,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 20,
   },
-  dateContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 16,
-    color: "#4B5563",
-    marginBottom: 5,
-  },
-  dateButton: {
-    backgroundColor: "#F3F4F6",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  dateButtonText: {
-    color: "#333",
-  },
 });
 
-export default RegisterLandsScreen;
+export default RegisterScreen;

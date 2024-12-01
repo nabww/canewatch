@@ -6,9 +6,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from "react-native";
 import supabase from "../../supabaseClient";
 import Button from "../../components/Button";
+import { ScrollView } from "react-native-gesture-handler";
 
 const LeasedLandsScreen = () => {
   const [lands, setLands] = useState([]);
@@ -60,16 +62,25 @@ const LeasedLandsScreen = () => {
     );
   }
 
+  const onRefresh = async () => {
+    setLoading(true);
+    await fetchLeasedLands();
+    setLoading(false);
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+      }>
       <FlatList
         data={lands}
         keyExtractor={(item) => item.id}
         renderItem={renderLandItem}
         contentContainerStyle={styles.list}
       />
-      <Button title="Refresh" onPress={fetchLeasedLands} />
-    </View>
+    </ScrollView>
   );
 };
 

@@ -14,6 +14,7 @@ import OwnedLandScreen from "./screens/farms/OwnedLandScreen";
 import CustomHeader from "./components/CustomHeader";
 import { PaperProvider } from "react-native-paper";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
+import MainActivityScreen from "./screens/activities/MainActivityScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -56,7 +57,9 @@ const ReportsStack = ({ navigation }) => (
       name="Reports"
       component={ReportsScreen}
       options={{
-        header: () => <CustomHeader title="Reports" navigation={navigation} />,
+        header: () => (
+          <CustomHeader title="Farm Reports" navigation={navigation} />
+        ),
       }}
     />
   </Stack.Navigator>
@@ -104,6 +107,20 @@ const OwnedLandsStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
+const ActivityStack = ({ navigation }) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Main Activity"
+      component={MainActivityScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Farm Activities" navigation={navigation} />
+        ),
+      }}
+    />
+  </Stack.Navigator>
+);
+
 const DrawerNavigator = () => (
   <Drawer.Navigator initialRouteName="Home">
     <Drawer.Screen
@@ -117,13 +134,13 @@ const DrawerNavigator = () => (
       options={{ headerShown: false }}
     />
     <Drawer.Screen
-      name="Reports"
-      component={ReportsStack}
+      name="Register Land"
+      component={RegisterLandStack}
       options={{ headerShown: false }}
     />
     <Drawer.Screen
-      name="Register Land"
-      component={RegisterLandStack}
+      name="Activities"
+      component={ActivityStack}
       options={{ headerShown: false }}
     />
     <Drawer.Screen
@@ -134,6 +151,11 @@ const DrawerNavigator = () => (
     <Drawer.Screen
       name="Owned Lands"
       component={OwnedLandsStack}
+      options={{ headerShown: false }}
+    />
+    <Drawer.Screen
+      name="Farm Reports"
+      component={ReportsStack}
       options={{ headerShown: false }}
     />
   </Drawer.Navigator>

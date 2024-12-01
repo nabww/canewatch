@@ -70,12 +70,22 @@ const RegisterLandScreen = ({ navigation }) => {
     const currentDate = selectedDate || leaseStart;
     setShowStartPicker(false);
     setLeaseStart(currentDate);
+    // if (selectedDate > leaseEnd) {
+    //   Alert.alert(
+    //     "Invalid Date",
+    //     "Start date cannot be ahead of the end date."
+    //   );
+    // }
   };
 
   const onChangeEnd = (event, selectedDate) => {
     const currentDate = selectedDate || leaseEnd;
     setShowEndPicker(false);
     setLeaseEnd(currentDate);
+    if (selectedDate < leaseStart) {
+      Alert.alert("Invalid Date", "End date cannot be before the start date.");
+      setLeaseEnd(leaseStart);
+    }
   };
 
   return (
