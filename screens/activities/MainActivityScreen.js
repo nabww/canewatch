@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -81,22 +82,20 @@ const MainActivityScreen = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
       <View style={styles.pickerWrapper}>
+        <Text style={styles.selectedFarmText}>
+          {selectedFarm
+            ? `Selected Farm: ${
+                farms.find((farm) => farm.id === selectedFarm)?.landName
+              }`
+            : "Select a farm"}
+        </Text>
         <Picker
           selectedValue={selectedFarm}
           onValueChange={(itemValue) => setSelectedFarm(itemValue)}
           style={styles.picker}>
           <Picker.Item label="Select a farm" value="" />
           {farms.map((farm) => (
-            <Picker.Item
-              key={farm.id}
-              label={farm.landName}
-              value={farm.id}
-              style={[
-                selectedFarm === farm.id
-                  ? { color: "#5C2D91", fontWeight: "bold" }
-                  : { color: "#000" },
-              ]}
-            />
+            <Picker.Item key={farm.id} label={farm.landName} value={farm.id} />
           ))}
         </Picker>
       </View>
@@ -156,10 +155,14 @@ const styles = StyleSheet.create({
   },
   pickerWrapper: {
     marginBottom: 15,
-    // borderWidth: 1,
-    // borderColor: "#ccc",
     borderRadius: 5,
     backgroundColor: "#fff",
+  },
+  selectedFarmText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#5C2D91",
+    marginBottom: 10,
   },
   input: {
     borderWidth: 1,

@@ -30,7 +30,7 @@ const HomeStack = ({ navigation }) => (
       name="Home"
       component={HomeScreen}
       options={{
-        header: () => <CustomHeader title="Home" navigation={navigation} />,
+        header: () => <CustomHeader title="Activity Feed" navigation={navigation} />,
       }}
     />
   </Stack.Navigator>
