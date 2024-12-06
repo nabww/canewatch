@@ -30,7 +30,7 @@ const CustomHeader = ({ title, navigation }) => {
         onPress: async () => {
           await supabase.auth.signOut();
           await AsyncStorage.removeItem("supabase_session");
-          navigation.replace("Login");
+          navigation.replace("LoginScreen");
         },
       },
     ]);

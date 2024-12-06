@@ -34,7 +34,7 @@ const HomeScreen = () => {
         `
         )
         .order("date", { ascending: false })
-        .limit(10);
+        .limit(30);
 
       if (error) throw error;
 

@@ -7,13 +7,16 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import supabase from "../../supabaseClient";
 
 const LandList = ({ type }) => {
   const [lands, setLands] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
 
   const fetchLands = async () => {
     setLoading(true);
@@ -46,14 +49,22 @@ const LandList = ({ type }) => {
     fetchLands();
   }, [type]);
 
+  const goToFarmDetails = (farmName, landId) => {
+    const routeName =
+      type === "Owned" ? "OwnedFarmDetails" : "LeasedFarmDetails";
+    navigation.navigate(routeName, { landId, farmName });
+  };
+
   const renderLandItem = ({ item }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => goToFarmDetails(item.landName, item.id)}>
       <Text style={styles.landName}>{item.landName}</Text>
       <Text>Location: {item.location}</Text>
       <Text>Size: {item.size} acres</Text>
       <Text>Lease Start: {item.lease_start || "N/A"}</Text>
       <Text>Lease End: {item.lease_end || "N/A"}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   if (loading && !refreshing) {

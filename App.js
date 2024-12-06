@@ -6,7 +6,6 @@ import { ThemeProvider } from "./context/ThemeContext";
 import LoginScreen from "./screens/users/LoginScreen";
 import RegisterScreen from "./screens/users/RegisterScreen";
 import HomeScreen from "./screens/Home/HomeScreen";
-import LandManagementScreen from "./screens/farms/LandManagementScreen";
 import ReportsScreen from "./screens/Reports/ReportsScreen";
 import RegisterLandsScreen from "./screens/farms/RegisterLandScreen";
 import LeasedOwnedToggleScreen from "./screens/farms/LeasedOwnedToggleScreen";
@@ -14,6 +13,7 @@ import CustomHeader from "./components/CustomHeader";
 import { PaperProvider } from "react-native-paper";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
 import MainActivityScreen from "./screens/activities/MainActivityScreen";
+import FarmDetails from "./screens/activities/FarmDetails";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -24,50 +24,26 @@ const DismissKeyboardWrapper = ({ children }) => (
   </TouchableWithoutFeedback>
 );
 
+// Home Stack
 const HomeStack = ({ navigation }) => (
   <Stack.Navigator>
     <Stack.Screen
-      name="Home"
+      name="HomeScreen"
       component={HomeScreen}
       options={{
-        header: () => <CustomHeader title="Activity Feed" navigation={navigation} />,
-      }}
-    />
-  </Stack.Navigator>
-);
-
-const LandManagementStack = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
-      name="Land Management"
-      component={LandManagementScreen}
-      options={{
         header: () => (
-          <CustomHeader title="Land Management" navigation={navigation} />
+          <CustomHeader title="Activity Feed" navigation={navigation} />
         ),
       }}
     />
   </Stack.Navigator>
 );
 
-const ReportsStack = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
-      name="Reports"
-      component={ReportsScreen}
-      options={{
-        header: () => (
-          <CustomHeader title="Farm Reports" navigation={navigation} />
-        ),
-      }}
-    />
-  </Stack.Navigator>
-);
-
+// Register Land Stack
 const RegisterLandStack = ({ navigation }) => (
   <Stack.Navigator>
     <Stack.Screen
-      name="Register Land"
+      name="RegisterLandScreen"
       component={RegisterLandsScreen}
       options={{
         header: () => (
@@ -78,22 +54,42 @@ const RegisterLandStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
+// Lands Stack
 const LandsStack = ({ navigation }) => (
   <Stack.Navigator>
     <Stack.Screen
-      name="Leased Lands"
+      name="LeasedOwnedToggleScreen"
       component={LeasedOwnedToggleScreen}
       options={{
         header: () => <CustomHeader title="Lands" navigation={navigation} />,
       }}
     />
+    <Stack.Screen
+      name="LeasedFarmDetails"
+      component={FarmDetails}
+      options={{
+        header: () => (
+          <CustomHeader title="Leased Farm Details" navigation={navigation} />
+        ),
+      }}
+    />
+    <Stack.Screen
+      name="OwnedFarmDetails"
+      component={FarmDetails}
+      options={{
+        header: () => (
+          <CustomHeader title="Owned Farm Details" navigation={navigation} />
+        ),
+      }}
+    />
   </Stack.Navigator>
 );
 
+// Activities Stack
 const ActivityStack = ({ navigation }) => (
   <Stack.Navigator>
     <Stack.Screen
-      name="Main Activity"
+      name="MainActivityScreen"
       component={MainActivityScreen}
       options={{
         header: () => (
@@ -104,60 +100,72 @@ const ActivityStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
+// Reports Stack
+const ReportsStack = ({ navigation }) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="ReportsScreen"
+      component={ReportsScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Farm Reports" navigation={navigation} />
+        ),
+      }}
+    />
+  </Stack.Navigator>
+);
+
+// Drawer Navigator
 const DrawerNavigator = () => (
-  <Drawer.Navigator initialRouteName="Home">
+  <Drawer.Navigator initialRouteName="DrawerHome">
     <Drawer.Screen
-      name="Home"
+      name="DrawerHome"
       component={HomeStack}
-      options={{ headerShown: false }}
+      options={{ headerShown: false, title: "Home" }}
     />
-    {/* <Drawer.Screen
-      name="Land Management"
-      component={LandManagementStack}
-      options={{ headerShown: false }}
-    /> */}
     <Drawer.Screen
-      name="Register Land"
+      name="DrawerRegisterLand"
       component={RegisterLandStack}
-      options={{ headerShown: false }}
+      options={{ headerShown: false, title: "Register Land" }}
     />
     <Drawer.Screen
-      name="Activities"
-      component={ActivityStack}
-      options={{ headerShown: false }}
-    />
-    <Drawer.Screen
-      name="Lands"
+      name="DrawerLands"
       component={LandsStack}
-      options={{ headerShown: false }}
+      options={{ headerShown: false, title: "Lands" }}
     />
     <Drawer.Screen
-      name="Farm Reports"
+      name="DrawerActivities"
+      component={ActivityStack}
+      options={{ headerShown: false, title: "Activities" }}
+    />
+    <Drawer.Screen
+      name="DrawerReports"
       component={ReportsStack}
-      options={{ headerShown: false }}
+      options={{ headerShown: false, title: "Reports" }}
     />
   </Drawer.Navigator>
 );
 
+// App Entry Point
 export default function App() {
   return (
     <PaperProvider>
       <ThemeProvider>
         <DismissKeyboardWrapper>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login">
+            <Stack.Navigator initialRouteName="LoginScreen">
               <Stack.Screen
-                name="Login"
+                name="LoginScreen"
                 component={LoginScreen}
                 options={{ headerShown: false }}
               />
               <Stack.Screen
-                name="Register"
+                name="RegisterScreen"
                 component={RegisterScreen}
                 options={{ headerShown: false }}
               />
               <Stack.Screen
-                name="Drawer"
+                name="MainDrawer"
                 component={DrawerNavigator}
                 options={{ headerShown: false, gestureEnabled: false }}
               />
