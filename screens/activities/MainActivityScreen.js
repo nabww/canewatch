@@ -8,13 +8,14 @@ import {
   ScrollView,
   RefreshControl,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import supabase from "../../supabaseClient";
+import SearchableDropdown from "../../components/SearchableDropdown"; // Assuming this is the path to the SearchableDropdown component.
 
 const MainActivityScreen = () => {
-  const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState("");
   const [activityType, setActivityType] = useState("");
   const [date, setDate] = useState(new Date());
@@ -22,29 +23,6 @@ const MainActivityScreen = () => {
   const [notes, setNotes] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    fetchFarms();
-  }, []);
-
-  const fetchFarms = async () => {
-    const { data, error } = await supabase
-      .from("lands")
-      .select("id, landName")
-      .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
-
-    if (error) {
-      Alert.alert("Error", "Failed to fetch farms.");
-    } else {
-      setFarms(data || []);
-    }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchFarms();
-    setRefreshing(false);
-  };
 
   const handleSaveActivity = async () => {
     if (!selectedFarm || !activityType || !date || !cost) {
@@ -76,74 +54,71 @@ const MainActivityScreen = () => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }>
-      <View style={styles.pickerWrapper}>
-        <Text style={styles.selectedFarmText}>
-          {selectedFarm
-            ? `Selected Farm: ${
-                farms.find((farm) => farm.id === selectedFarm)?.landName
-              }`
-            : "Select a farm"}
-        </Text>
-        <Picker
-          selectedValue={selectedFarm}
-          onValueChange={(itemValue) => setSelectedFarm(itemValue)}
-          style={styles.picker}>
-          <Picker.Item label="Select a farm" value="" />
-          {farms.map((farm) => (
-            <Picker.Item key={farm.id} label={farm.landName} value={farm.id} />
-          ))}
-        </Picker>
-      </View>
-      <TextInput
-        style={styles.input}
-        placeholder="Activity Type (e.g., Tilling)"
-        value={activityType}
-        onChangeText={setActivityType}
-      />
-      <View style={styles.datePickerContainer}>
-        <Text style={styles.dateLabel}>Date of Activity:</Text>
-        <TouchableOpacity
-          onPress={() => setShowDatePicker(true)}
-          style={styles.dateTouchable}>
-          <Text style={styles.dateText}>
-            {date.toISOString().split("T")[0]}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) setDate(selectedDate);
-          }}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => setRefreshing(false)} // Replace this with a refresh function if needed.
+          />
+        }>
+        <View style={styles.searchableDropdownWrapper}>
+          <SearchableDropdown
+            placeholder="Search to select a farm"
+            onSelect={(id, landName) => setSelectedFarm(id)}
+          />
+        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Activity Type (e.g., Tilling)"
+          value={activityType}
+          onChangeText={setActivityType}
         />
-      )}
-      <TextInput
-        style={styles.input}
-        placeholder="Cost"
-        keyboardType="numeric"
-        value={cost}
-        onChangeText={setCost}
-      />
-      <TextInput
-        style={[styles.input, styles.notes]}
-        placeholder="Notes (optional)"
-        multiline
-        value={notes}
-        onChangeText={setNotes}
-      />
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveActivity}>
-        <Text style={styles.saveButtonText}>Save Activity</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <View style={styles.datePickerContainer}>
+          <Text style={styles.dateLabel}>Date of Activity:</Text>
+          <TouchableOpacity
+            onPress={() => setShowDatePicker(true)}
+            style={styles.dateTouchable}>
+            <Text style={styles.dateText}>
+              {date.toISOString().split("T")[0]}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
+        )}
+        <TextInput
+          style={styles.input}
+          placeholder="Cost"
+          keyboardType="numeric"
+          value={cost}
+          onChangeText={setCost}
+        />
+        <TextInput
+          style={[styles.input, styles.notes]}
+          placeholder="Notes (optional)"
+          multiline
+          value={notes}
+          onChangeText={setNotes}
+        />
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleSaveActivity}>
+          <Text style={styles.saveButtonText}>Save Activity</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -153,16 +128,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f8f8",
     padding: 20,
   },
-  pickerWrapper: {
-    marginBottom: 15,
-    borderRadius: 5,
-    backgroundColor: "#fff",
+  searchableDropdownWrapper: {
+    marginBottom: 20,
   },
-  selectedFarmText: {
+  label: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#5C2D91",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   input: {
     borderWidth: 1,

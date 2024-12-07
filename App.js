@@ -14,6 +14,7 @@ import { PaperProvider } from "react-native-paper";
 import { Keyboard, TouchableWithoutFeedback } from "react-native";
 import MainActivityScreen from "./screens/activities/MainActivityScreen";
 import FarmDetails from "./screens/activities/FarmDetails";
+import HarvestScreen from "./screens/activities/HarvestScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -68,18 +69,14 @@ const LandsStack = ({ navigation }) => (
       name="LeasedFarmDetails"
       component={FarmDetails}
       options={{
-        header: () => (
-          <CustomHeader title="Leased Farm Details" navigation={navigation} />
-        ),
+        header: () => <CustomHeader title="Details" navigation={navigation} />,
       }}
     />
     <Stack.Screen
       name="OwnedFarmDetails"
       component={FarmDetails}
       options={{
-        header: () => (
-          <CustomHeader title="Owned Farm Details" navigation={navigation} />
-        ),
+        header: () => <CustomHeader title="Details" navigation={navigation} />,
       }}
     />
   </Stack.Navigator>
@@ -115,6 +112,20 @@ const ReportsStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
+const HarvestStack = ({ navigation }) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="HarvestScreen"
+      component={HarvestScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Record Harvest" navigation={navigation} />
+        ),
+      }}
+    />
+  </Stack.Navigator>
+);
+
 // Drawer Navigator
 const DrawerNavigator = () => (
   <Drawer.Navigator initialRouteName="DrawerHome">
@@ -131,17 +142,22 @@ const DrawerNavigator = () => (
     <Drawer.Screen
       name="DrawerLands"
       component={LandsStack}
-      options={{ headerShown: false, title: "Lands" }}
+      options={{ headerShown: false, title: "View Lands" }}
     />
     <Drawer.Screen
       name="DrawerActivities"
       component={ActivityStack}
-      options={{ headerShown: false, title: "Activities" }}
+      options={{ headerShown: false, title: "Record Activity" }}
+    />
+    <Drawer.Screen
+      name="DrawerHarvests"
+      component={HarvestStack}
+      options={{ headerShown: false, title: "Record Harvest" }}
     />
     <Drawer.Screen
       name="DrawerReports"
       component={ReportsStack}
-      options={{ headerShown: false, title: "Reports" }}
+      options={{ headerShown: false, title: "View Reports" }}
     />
   </Drawer.Navigator>
 );
