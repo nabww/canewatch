@@ -1,123 +1,167 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Alert,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Alert,
+  TextInput,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import supabase from "../../supabaseClient";
-import SearchableDropdown from "../../components/SearchableDropdown"; // Assuming this is the path to the SearchableDropdown component.
+import SearchableDropdown from "../../components/SearchableDropdown";
+import Input from "../../components/Input ";
+import { FlatList } from "react-native";
 
 const MainActivityScreen = () => {
   const [selectedFarm, setSelectedFarm] = useState("");
   const [activityType, setActivityType] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState("");
   const [cost, setCost] = useState("");
   const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
   const handleSaveActivity = async () => {
     if (!selectedFarm || !activityType || !date || !cost) {
-      alert("Please fill in all required fields.");
+      Alert.alert("Validation Error", "All fields except Notes are required.");
       return;
     }
 
-    const activityData = {
-      land_id: selectedFarm,
-      type: activityType,
-      date: date.toISOString().split("T")[0],
-      cost: parseFloat(cost),
-      notes,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-    };
+    setLoading(true);
+    try {
+      const { data, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
 
-    const { error } = await supabase.from("activities").insert(activityData);
+      const userId = data?.user?.id; // Correctly accessing the user ID
+      if (!userId) throw new Error("User not authenticated");
 
-    if (error) {
-      alert("Error saving activity: " + error.message);
-    } else {
-      alert("Activity recorded successfully!");
+      const activityData = {
+        land_id: selectedFarm,
+        type: activityType,
+        date,
+        cost: parseFloat(cost),
+        notes: notes || null,
+        user_id: userId,
+      };
+
+      const { error } = await supabase.from("activities").insert(activityData);
+      if (error) throw error;
+
+      Alert.alert("Success", "Activity recorded successfully.");
       setSelectedFarm("");
       setActivityType("");
-      setDate(new Date());
+      setDate("");
       setCost("");
       setNotes("");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView
-        style={styles.container}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => setRefreshing(false)} // Replace this with a refresh function if needed.
-          />
-        }>
-        <View style={styles.searchableDropdownWrapper}>
-          <SearchableDropdown
-            placeholder="Search to select a farm"
-            onSelect={(id, landName) => setSelectedFarm(id)}
-          />
-        </View>
-        <TextInput
-          style={styles.input}
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDate(selectedDate.toISOString().split("T")[0]); // Format to YYYY-MM-DD
+    }
+  };
+
+  const formData = [
+    {
+      key: "farmSelection",
+      component: (
+        <SearchableDropdown
+          placeholder="Search to select a farm"
+          onSelect={(id) => setSelectedFarm(id)}
+        />
+      ),
+    },
+    {
+      key: "activityType",
+      component: (
+        <Input
           placeholder="Activity Type (e.g., Tilling)"
           value={activityType}
           onChangeText={setActivityType}
         />
-        <View style={styles.datePickerContainer}>
-          <Text style={styles.dateLabel}>Date of Activity:</Text>
+      ),
+    },
+    {
+      key: "date",
+      component: (
+        <View>
           <TouchableOpacity
-            onPress={() => setShowDatePicker(true)}
-            style={styles.dateTouchable}>
-            <Text style={styles.dateText}>
-              {date.toISOString().split("T")[0]}
+            style={[styles.input, styles.dateButton]}
+            onPress={() => setShowDatePicker(true)}>
+            <Text style={{ fontSize: 16, color: date ? "#000" : "#aaa" }}>
+              {date || "Select Date"}
             </Text>
           </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date ? new Date(date) : new Date()}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
         </View>
-        {showDatePicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={(event, selectedDate) => {
-              setShowDatePicker(false);
-              if (selectedDate) setDate(selectedDate);
-            }}
-          />
-        )}
-        <TextInput
-          style={styles.input}
+      ),
+    },
+    {
+      key: "cost",
+      component: (
+        <Input
           placeholder="Cost"
           keyboardType="numeric"
           value={cost}
           onChangeText={setCost}
         />
+      ),
+    },
+    {
+      key: "notes",
+      component: (
         <TextInput
-          style={[styles.input, styles.notes]}
           placeholder="Notes (optional)"
           multiline
+          style={[styles.notes, styles.input]}
           value={notes}
           onChangeText={setNotes}
         />
+      ),
+    },
+    {
+      key: "submit",
+      component: (
         <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleSaveActivity}>
-          <Text style={styles.saveButtonText}>Save Activity</Text>
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleSaveActivity}
+          disabled={loading}>
+          <Text style={styles.buttonText}>
+            {loading ? "Submitting..." : "Save Activity"}
+          </Text>
         </TouchableOpacity>
-      </ScrollView>
+      ),
+    },
+  ];
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}>
+      <FlatList
+        data={formData}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => (
+          <View style={styles.item}>{item.component}</View>
+        )}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -125,59 +169,45 @@ const MainActivityScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
-    padding: 20,
-  },
-  searchableDropdownWrapper: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#5C2D91",
-    marginBottom: 8,
+    backgroundColor: "#F9F9FB",
   },
   input: {
+    backgroundColor: "#ffffff",
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
-    backgroundColor: "#fff",
+    borderColor: "#dddddd",
+  },
+  notesInput: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  dateButton: {
+    justifyContent: "center",
+  },
+  button: {
+    backgroundColor: "#5C2D91",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonDisabled: {
+    backgroundColor: "#999999",
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  item: {
+    paddingHorizontal: 20,
+    paddingVertical: 2,
   },
   notes: {
     height: 100,
     textAlignVertical: "top",
-  },
-  datePickerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  dateLabel: {
-    fontSize: 16,
-    marginRight: 10,
-  },
-  dateTouchable: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    backgroundColor: "#fff",
-  },
-  dateText: {
-    fontSize: 16,
-  },
-  saveButton: {
-    backgroundColor: "#5C2D91",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });
 

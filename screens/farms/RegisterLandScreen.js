@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   ScrollView,
@@ -12,7 +12,7 @@ import supabase from "../../supabaseClient";
 import Button from "../../components/Button";
 import Input from "../../components/Input ";
 
-const RegisterLandScreen = ({ navigation }) => {
+const RegisterLandScreen = ({ navigation, route }) => {
   const [landName, setLandName] = useState("");
   const [location, setLocation] = useState("");
   const [landSize, setLandSize] = useState("");
@@ -21,14 +21,31 @@ const RegisterLandScreen = ({ navigation }) => {
   const [leaseEnd, setLeaseEnd] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isUpdate, setIsUpdate] = useState(false);
 
-  const handleRegisterLand = async () => {
+  useEffect(() => {
+    if (route.params && route.params.land) {
+      const { land } = route.params;
+      setLandName(land.landName);
+      setLocation(land.location);
+      setLandSize(land.size);
+      setLeaseStatus(land.type);
+      setLeaseStart(land.lease_start ? new Date(land.lease_start) : new Date());
+      setLeaseEnd(land.lease_end ? new Date(land.lease_end) : new Date());
+      setIsUpdate(true);
+    }
+  }, [route.params]);
+
+  const handleSaveLand = async () => {
+    if (!landName || !location || !landSize || !leaseStatus) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      if (!landName || !location || !landSize || !leaseStatus) {
-        Alert.alert("Error", "Please fill in all fields.");
-        return;
-      }
-
       const { data, error: userError } = await supabase.auth.getUser();
       if (userError || !data || !data.user) {
         Alert.alert("Error", "User not authenticated.");
@@ -44,25 +61,36 @@ const RegisterLandScreen = ({ navigation }) => {
         lease_start: leaseStatus === "Leased" ? leaseStart : null,
         lease_end: leaseStatus === "Leased" ? leaseEnd : null,
       };
-      // console.log(landData);
 
-      const { error } = await supabase.from("lands").insert(landData);
+      let error;
+      if (isUpdate) {
+        const { error: updateError } = await supabase
+          .from("lands")
+          .update(landData)
+          .eq("id", route.params.land.id);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from("lands")
+          .insert(landData);
+        error = insertError;
+      }
 
       if (error) {
         Alert.alert("Error", error.message);
         return;
       }
 
-      Alert.alert("Success", "Land registered successfully!");
-      setLandName("");
-      setLocation("");
-      setLandSize("");
-      setLeaseStatus("");
-      setLeaseStart(new Date());
-      setLeaseEnd(new Date());
+      Alert.alert(
+        "Success",
+        `Land ${isUpdate ? "updated" : "registered"} successfully!`
+      );
+      navigation.goBack();
     } catch (error) {
       console.error("Unhandled error:", error);
       Alert.alert("Error", "An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,12 +98,6 @@ const RegisterLandScreen = ({ navigation }) => {
     const currentDate = selectedDate || leaseStart;
     setShowStartPicker(false);
     setLeaseStart(currentDate);
-    // if (selectedDate > leaseEnd) {
-    //   Alert.alert(
-    //     "Invalid Date",
-    //     "Start date cannot be ahead of the end date."
-    //   );
-    // }
   };
 
   const onChangeEnd = (event, selectedDate) => {
@@ -170,7 +192,13 @@ const RegisterLandScreen = ({ navigation }) => {
           )}
         </>
       )}
-      <Button title="Register Land" onPress={handleRegisterLand} />
+      <Button
+        onPress={handleSaveLand}
+        title={
+          loading ? "Submitting..." : isUpdate ? "Update Land" : "Save Land"
+        }
+        loading={loading}
+      />
     </ScrollView>
   );
 };

@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import ModalDropdown from "react-native-modal-dropdown";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import supabase from "../../supabaseClient";
 
 const LandList = ({ type }) => {
@@ -55,17 +57,84 @@ const LandList = ({ type }) => {
     navigation.navigate(routeName, { landId, farmName });
   };
 
-  const renderLandItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => goToFarmDetails(item.landName, item.id)}>
-      <Text style={styles.landName}>{item.landName}</Text>
-      <Text>Location: {item.location}</Text>
-      <Text>Size: {item.size} acres</Text>
-      <Text>Lease Start: {item.lease_start || "N/A"}</Text>
-      <Text>Lease End: {item.lease_end || "N/A"}</Text>
-    </TouchableOpacity>
-  );
+  const handleOptionSelect = (index, land) => {
+    if (index === "0") {
+      // Handle update action
+      navigation.navigate("RegisterScreen", { land });
+    } else if (index === "1") {
+      // Handle delete action
+      Alert.alert(
+        "Confirm Delete",
+        "Are you sure you want to delete this land?",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: () => deleteLand(land.id),
+          },
+        ]
+      );
+    }
+  };
+
+  const deleteLand = async (landId) => {
+    try {
+      const { error } = await supabase.from("lands").delete().eq("id", landId);
+      if (error) throw error;
+      fetchLands(); // Refresh the list after deleting
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const getRemainingDays = (leaseEndDate) => {
+    const currentDate = new Date();
+    const endDate = new Date(leaseEndDate);
+    const timeDiff = endDate - currentDate;
+    const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    return daysRemaining;
+  };
+
+  const renderLandItem = ({ item }) => {
+    const daysRemaining = getRemainingDays(item.lease_end);
+
+    return (
+      <View style={styles.card} key={item.id}>
+        {item.lease_end && (
+          <View
+            style={[
+              styles.banner,
+              daysRemaining <= 30 && styles.bannerWarning,
+            ]}>
+            <Text style={styles.bannerText}>
+              {daysRemaining > 0
+                ? `${daysRemaining} days remaining`
+                : "Lease expired"}
+            </Text>
+          </View>
+        )}
+        <View style={styles.cardContent}>
+          <TouchableOpacity
+            onPress={() => goToFarmDetails(item.landName, item.id)}>
+            <Text style={styles.landName}>{item.landName}</Text>
+            <Text>Location: {item.location}</Text>
+            <Text>Size: {item.size} acres</Text>
+            <Text>Lease Start: {item.lease_start || "N/A"}</Text>
+            <Text>Lease End: {item.lease_end || "N/A"}</Text>
+          </TouchableOpacity>
+          <ModalDropdown
+            options={["Update", "Delete"]}
+            style={styles.optionsButton}
+            textStyle={styles.optionsButtonText}
+            dropdownStyle={styles.dropdownStyle}
+            onSelect={(index) => handleOptionSelect(index, item)}>
+            <Icon name="more-vert" size={24} color="#5C2D91" />
+          </ModalDropdown>
+        </View>
+      </View>
+    );
+  };
 
   if (loading && !refreshing) {
     return (
@@ -104,6 +173,26 @@ const styles = StyleSheet.create({
     elevation: 3,
     margin: 6,
   },
+  banner: {
+    backgroundColor: "#5C2D91",
+    padding: 5,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    alignItems: "center",
+  },
+  bannerWarning: {
+    backgroundColor: "#FF0000",
+  },
+  bannerText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  cardContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   landName: {
     fontSize: 18,
     fontWeight: "bold",
@@ -114,6 +203,22 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: "gray",
+  },
+  optionsButton: {
+    alignItems: "center",
+    padding: 5,
+  },
+  optionsButtonText: {
+    display: "none",
+  },
+  dropdownStyle: {
+    width: 100,
+    backgroundColor: "#ffffff",
+    borderColor: "#5C2D91",
+    borderWidth: 1,
+    borderRadius: 8,
+    height: 80,
+    fontSize: 12,
   },
 });
 

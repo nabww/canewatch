@@ -3,17 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   Alert,
   TextInput,
+  FlatList,
 } from "react-native";
 import supabase from "../../supabaseClient";
-import Input from "../../components/Input ";
 import SearchableDropdown from "../../components/SearchableDropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import Input from "../../components/Input ";
 
 const HarvestScreen = () => {
   const [noOfBags, setNoOfBags] = useState("");
@@ -34,11 +34,11 @@ const HarvestScreen = () => {
     setLoading(true);
 
     try {
-      // Fetch the authenticated user
-      const { data: user, error: userError } = await supabase.auth.getUser();
+      const { data, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      const { id: userId } = user;
+      const userId = data?.user?.id; // Correctly access the user ID
+      if (!userId) throw new Error("User not authenticated");
 
       const { error } = await supabase.from("harvests").insert({
         no_of_bags: parseFloat(noOfBags),
@@ -46,13 +46,12 @@ const HarvestScreen = () => {
         date: date,
         notes: notes || null,
         land_id: landId,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: userId, // Use the correct user ID
       });
 
       if (error) throw error;
 
       Alert.alert("Success", "Harvest details recorded successfully.");
-      // Clear form fields after successful submission
       setNoOfBags("");
       setValueAtHarvest("");
       setDate("");
@@ -69,15 +68,14 @@ const HarvestScreen = () => {
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setDate(selectedDate.toISOString().split("T")[0]); // Format to YYYY-MM-DD
+      setDate(selectedDate.toISOString().split("T")[0]);
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+  const formData = [
+    {
+      key: "farmSelection",
+      component: (
         <SearchableDropdown
           placeholder="Search to select a farm"
           onSelect={(id, name) => {
@@ -85,7 +83,11 @@ const HarvestScreen = () => {
             setLandName(name);
           }}
         />
-
+      ),
+    },
+    {
+      key: "bags",
+      component: (
         <Input
           style={styles.input}
           placeholder="Number of Bags"
@@ -93,7 +95,11 @@ const HarvestScreen = () => {
           value={noOfBags}
           onChangeText={setNoOfBags}
         />
-
+      ),
+    },
+    {
+      key: "value",
+      component: (
         <Input
           style={styles.input}
           placeholder="Value at Harvest"
@@ -101,7 +107,11 @@ const HarvestScreen = () => {
           value={valueAtHarvest}
           onChangeText={setValueAtHarvest}
         />
-
+      ),
+    },
+    {
+      key: "date",
+      component: (
         <View>
           <TouchableOpacity
             style={[styles.input, { justifyContent: "center" }]}
@@ -119,7 +129,11 @@ const HarvestScreen = () => {
             />
           )}
         </View>
-
+      ),
+    },
+    {
+      key: "notes",
+      component: (
         <TextInput
           style={[styles.input, styles.notes]}
           placeholder="Notes (optional)"
@@ -127,7 +141,11 @@ const HarvestScreen = () => {
           value={notes}
           onChangeText={setNotes}
         />
-
+      ),
+    },
+    {
+      key: "submit",
+      component: (
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSubmit}
@@ -136,7 +154,21 @@ const HarvestScreen = () => {
             {loading ? "Submitting..." : "Submit"}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      ),
+    },
+  ];
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}>
+      <FlatList
+        data={formData}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => (
+          <View style={styles.item}>{item.component}</View>
+        )}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -144,13 +176,7 @@ const HarvestScreen = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#F9F9FB",
-  },
-  scrollContent: {
-    paddingLeft: 20,
-    paddingRight: 20,
-    paddingTop: 15,
-    flexGrow: 1,
-    justifyContent: "center",
+    flex: 1,
   },
   input: {
     backgroundColor: "#ffffff",
@@ -164,6 +190,10 @@ const styles = StyleSheet.create({
   notes: {
     height: 100,
     textAlignVertical: "top",
+  },
+  item: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   button: {
     backgroundColor: "#5C2D91",
