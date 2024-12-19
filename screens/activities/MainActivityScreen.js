@@ -63,7 +63,6 @@ const MainActivityScreen = () => {
     }
   };
 
-
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {

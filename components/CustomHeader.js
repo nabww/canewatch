@@ -77,7 +77,7 @@ const CustomHeader = ({ title, navigation }) => {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    marginTop: 30,
+    marginTop: 39,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

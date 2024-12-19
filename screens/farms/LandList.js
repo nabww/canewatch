@@ -102,15 +102,13 @@ const LandList = ({ type }) => {
     return (
       <View style={styles.card} key={item.id}>
         {item.lease_end && (
-          <View
-            style={[
-              styles.banner,
-              daysRemaining <= 30 && styles.bannerWarning,
-            ]}>
-            <Text style={styles.bannerText}>
-              {daysRemaining > 0
-                ? `${daysRemaining} days remaining`
-                : "Lease expired"}
+          <View style={styles.badgeContainer}>
+            <Text
+              style={[
+                styles.badge,
+                daysRemaining <= 30 && styles.badgeWarning,
+              ]}>
+              {daysRemaining > 0 ? `${daysRemaining}d` : "Expired"}
             </Text>
           </View>
         )}
@@ -172,21 +170,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     elevation: 3,
     margin: 6,
+    position: "relative", // Ensure badge is positioned relative to the card
   },
-  banner: {
+  badgeContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    zIndex: 1, // Ensure badge is above other content
+  },
+  badge: {
     backgroundColor: "#5C2D91",
-    padding: 5,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    alignItems: "center",
-  },
-  bannerWarning: {
-    backgroundColor: "#FF0000",
-  },
-  bannerText: {
     color: "#FFFFFF",
-    fontSize: 14,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 12,
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  badgeWarning: {
+    backgroundColor: "#FF0000",
   },
   cardContent: {
     flexDirection: "row",
