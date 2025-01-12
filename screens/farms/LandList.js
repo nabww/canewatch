@@ -58,11 +58,15 @@ const LandList = ({ type }) => {
   };
 
   const handleOptionSelect = (index, land) => {
+    console.log("Selected option index: ", index);
     if (index === "0") {
       // Handle update action
-      navigation.navigate("RegisterScreen", { land });
+      const routeName = "RegisterScreen";
+      console.log("Navigating to RegisterScreen with land: ", land);
+      navigation.navigate(routeName, { land });
     } else if (index === "1") {
       // Handle delete action
+      console.log("Prompting delete confirmation for land: ", land);
       Alert.alert(
         "Confirm Delete",
         "Are you sure you want to delete this land?",
@@ -71,7 +75,10 @@ const LandList = ({ type }) => {
           {
             text: "Delete",
             style: "destructive",
-            onPress: () => deleteLand(land.id),
+            onPress: () => {
+              console.log("Delete confirmed for land: ", land);
+              deleteLand(land.id);
+            },
           },
         ]
       );
@@ -79,11 +86,14 @@ const LandList = ({ type }) => {
   };
 
   const deleteLand = async (landId) => {
+    console.log("Deleting land with ID: ", landId);
     try {
       const { error } = await supabase.from("lands").delete().eq("id", landId);
       if (error) throw error;
+      console.log("Land deleted successfully.");
       fetchLands(); // Refresh the list after deleting
     } catch (error) {
+      console.error("Error deleting land: ", error.message);
       Alert.alert("Error", error.message);
     }
   };
@@ -100,7 +110,7 @@ const LandList = ({ type }) => {
     const daysRemaining = getRemainingDays(item.lease_end);
 
     return (
-      <View style={styles.card} key={item.id}>
+      <View style={styles.card}>
         {item.lease_end && (
           <View style={styles.badgeContainer}>
             <Text
@@ -145,7 +155,7 @@ const LandList = ({ type }) => {
   return (
     <FlatList
       data={lands}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
       renderItem={renderLandItem}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -170,13 +180,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     elevation: 3,
     margin: 6,
-    position: "relative", // Ensure badge is positioned relative to the card
+    position: "relative",
   },
   badgeContainer: {
     position: "absolute",
     top: 10,
     right: 10,
-    zIndex: 1, // Ensure badge is above other content
+    zIndex: 1,
   },
   badge: {
     backgroundColor: "#5C2D91",

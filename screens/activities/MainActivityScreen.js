@@ -74,26 +74,36 @@ const MainActivityScreen = () => {
     {
       key: "farmSelection",
       component: (
-        <SearchableDropdown
-          placeholder="Search to select a farm"
-          onSelect={(id) => setSelectedFarm(id)}
-        />
+        <View>
+          <Text style={styles.label}>Select Farm</Text>
+
+          <SearchableDropdown
+            placeholder="Search to select a farm"
+            onSelect={(id) => setSelectedFarm(id)}
+          />
+        </View>
       ),
     },
     {
       key: "activityType",
       component: (
-        <Input
-          placeholder="Activity Type (e.g., Tilling)"
-          value={activityType}
-          onChangeText={setActivityType}
-        />
+        <View>
+          <Text style={styles.label}>Select Activity</Text>
+
+          <Input
+            placeholder="Activity Type (e.g., Tilling)"
+            value={activityType}
+            onChangeText={setActivityType}
+          />
+        </View>
       ),
     },
     {
       key: "date",
       component: (
         <View>
+          <Text style={styles.label}>Activity Date</Text>
+
           <TouchableOpacity
             style={[styles.input, styles.dateButton]}
             onPress={() => setShowDatePicker(true)}>
@@ -115,12 +125,16 @@ const MainActivityScreen = () => {
     {
       key: "cost",
       component: (
-        <Input
-          placeholder="Cost"
-          keyboardType="numeric"
-          value={cost}
-          onChangeText={setCost}
-        />
+        <View>
+          <Text style={styles.label}>Cost of activity</Text>
+
+          <Input
+            placeholder="Cost"
+            keyboardType="numeric"
+            value={cost}
+            onChangeText={setCost}
+          />
+        </View>
       ),
     },
     {
@@ -207,6 +221,11 @@ const styles = StyleSheet.create({
   notes: {
     height: 100,
     textAlignVertical: "top",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
   },
 });
 

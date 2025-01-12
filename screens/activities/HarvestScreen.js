@@ -76,43 +76,57 @@ const HarvestScreen = () => {
     {
       key: "farmSelection",
       component: (
-        <SearchableDropdown
-          placeholder="Search to select a farm"
-          onSelect={(id, name) => {
-            setLandId(id);
-            setLandName(name);
-          }}
-        />
+        <View>
+          <Text style={styles.label}>Select Farm</Text>
+
+          <SearchableDropdown
+            placeholder="Search to select a farm"
+            onSelect={(id, name) => {
+              setLandId(id);
+              setLandName(name);
+            }}
+          />
+        </View>
       ),
     },
     {
       key: "bags",
       component: (
-        <Input
-          style={styles.input}
-          placeholder="Number of Bags"
-          keyboardType="numeric"
-          value={noOfBags}
-          onChangeText={setNoOfBags}
-        />
+        <View>
+          <Text style={styles.label}>Number of bags at harvest</Text>
+
+          <Input
+            style={styles.input}
+            placeholder="Number of Bags"
+            keyboardType="numeric"
+            value={noOfBags}
+            onChangeText={setNoOfBags}
+          />
+        </View>
       ),
     },
     {
       key: "value",
       component: (
-        <Input
-          style={styles.input}
-          placeholder="Value at Harvest"
-          keyboardType="numeric"
-          value={valueAtHarvest}
-          onChangeText={setValueAtHarvest}
-        />
+        <View>
+          <Text style={styles.label}>Estimated value at harvest</Text>
+
+          <Input
+            style={styles.input}
+            placeholder="Value at Harvest"
+            keyboardType="numeric"
+            value={valueAtHarvest}
+            onChangeText={setValueAtHarvest}
+          />
+        </View>
       ),
     },
     {
       key: "date",
       component: (
         <View>
+          <Text style={styles.label}>Date of harvest</Text>
+
           <TouchableOpacity
             style={[styles.input, { justifyContent: "center" }]}
             onPress={() => setShowDatePicker(true)}>
@@ -134,13 +148,15 @@ const HarvestScreen = () => {
     {
       key: "notes",
       component: (
-        <TextInput
-          style={[styles.input, styles.notes]}
-          placeholder="Notes (optional)"
-          multiline
-          value={notes}
-          onChangeText={setNotes}
-        />
+        <View>
+          <TextInput
+            style={[styles.input, styles.notes]}
+            placeholder="Notes (optional)"
+            multiline
+            value={notes}
+            onChangeText={setNotes}
+          />
+        </View>
       ),
     },
     {
@@ -208,6 +224,11 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
   },
 });
 
