@@ -59,8 +59,8 @@ const LandList = ({ type }) => {
 
   const handleOptionSelect = (index, land) => {
     console.log("Selected option index: ", index);
-    if (index === "0") {
-      // Handle update action
+    if (index === 0) {
+      // Handle update actiong
       const routeName = "RegisterScreen";
       console.log("Navigating to RegisterScreen with land: ", land);
       navigation.navigate(routeName, { land });

@@ -16,7 +16,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import Input from "../../components/Input ";
 
 const HarvestScreen = () => {
-  const [noOfBags, setNoOfBags] = useState("");
+  const [noOfUnits, setNoOfUnits] = useState("");
+  const [unit, setUnit] = useState("bags"); // Default to 'bags'
   const [valueAtHarvest, setValueAtHarvest] = useState("");
   const [date, setDate] = useState("");
   const [notes, setNotes] = useState("");
@@ -26,7 +27,7 @@ const HarvestScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleSubmit = async () => {
-    if (!noOfBags || !valueAtHarvest || !date || !landId) {
+    if (!noOfUnits || !valueAtHarvest || !date || !landId || !unit) {
       Alert.alert("Validation Error", "All fields except Notes are required.");
       return;
     }
@@ -41,7 +42,8 @@ const HarvestScreen = () => {
       if (!userId) throw new Error("User not authenticated");
 
       const { error } = await supabase.from("harvests").insert({
-        no_of_bags: parseFloat(noOfBags),
+        no_of_units: parseFloat(noOfUnits),
+        unit: unit,
         value_at_harvest: parseFloat(valueAtHarvest),
         date: date,
         notes: notes || null,
@@ -52,12 +54,13 @@ const HarvestScreen = () => {
       if (error) throw error;
 
       Alert.alert("Success", "Harvest details recorded successfully.");
-      setNoOfBags("");
+      setNoOfUnits("");
       setValueAtHarvest("");
       setDate("");
       setNotes("");
       setLandId("");
       setLandName("");
+      setUnit("bags"); // Reset unit to default
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -90,17 +93,34 @@ const HarvestScreen = () => {
       ),
     },
     {
-      key: "bags",
+      key: "units",
       component: (
         <View>
-          <Text style={styles.label}>Number of bags at harvest</Text>
+          <Text style={styles.label}>Number of Units at Harvest</Text>
 
           <Input
             style={styles.input}
-            placeholder="Number of Bags"
+            placeholder="Number of Units"
             keyboardType="numeric"
-            value={noOfBags}
-            onChangeText={setNoOfBags}
+            value={noOfUnits}
+            onChangeText={setNoOfUnits}
+          />
+        </View>
+      ),
+    },
+    {
+      key: "unitSelection",
+      component: (
+        <View>
+          <Text style={styles.label}>Unit of Harvest</Text>
+
+          <SearchableDropdown
+            options={["bags", "kilograms", "tons"]}
+            onSelect={(index, value) => setUnit(value)}
+            defaultIndex={0} // Default to 'bags'
+            defaultValue="bags"
+            placeholder="Unit of harvest e.g. bags, tonnes..."
+            style={styles.dropdown}
           />
         </View>
       ),
@@ -109,7 +129,7 @@ const HarvestScreen = () => {
       key: "value",
       component: (
         <View>
-          <Text style={styles.label}>Estimated value at harvest</Text>
+          <Text style={styles.label}>Value per Unit</Text>
 
           <Input
             style={styles.input}
@@ -125,7 +145,7 @@ const HarvestScreen = () => {
       key: "date",
       component: (
         <View>
-          <Text style={styles.label}>Date of harvest</Text>
+          <Text style={styles.label}>Date of Harvest</Text>
 
           <TouchableOpacity
             style={[styles.input, { justifyContent: "center" }]}
@@ -229,6 +249,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
+  },
+  dropdown: {
+    padding: 12,
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#dddddd",
+    marginBottom: 16,
   },
 });
 

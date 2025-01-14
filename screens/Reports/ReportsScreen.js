@@ -8,7 +8,7 @@ import {
   ScrollView,
   RefreshControl,
 } from "react-native";
-import { BarChart, LineChart } from "react-native-chart-kit";
+import { BarChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import supabase from "../../supabaseClient";
 
@@ -89,12 +89,12 @@ const ReportsScreen = () => {
 
       const { data: harvestData, error: harvestError } = await supabase
         .from("harvests")
-        .select("no_of_bags, value_at_harvest");
+        .select("no_of_units, value_at_harvest");
       if (harvestError) throw harvestError;
 
       console.log("General harvest data: ", harvestData);
       const totalIncome = harvestData.reduce(
-        (total, item) => total + item.no_of_bags * item.value_at_harvest,
+        (total, item) => total + item.no_of_units * item.value_at_harvest,
         0
       );
 
@@ -141,7 +141,6 @@ const ReportsScreen = () => {
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={fetchReportsData} />
       }>
-      {/* <Text style={styles.header}>Financial Dashboard</Text> */}
       <Text style={styles.chartTitle}>Profit & Loss Overview</Text>
       <BarChart
         data={generateProfitLossData()}
@@ -156,7 +155,9 @@ const ReportsScreen = () => {
         width={screenWidth - 32}
         height={220}
         chartConfig={chartConfig}
-        verticalLabelRotation={30}
+        fromZero
+        yAxisLabel=""
+        // yAxisSuffix=" KES"s
       />
       <Text style={styles.chartTitle}>Expenditure by Activity</Text>
       <BarChart
@@ -164,28 +165,10 @@ const ReportsScreen = () => {
         width={screenWidth - 32}
         height={220}
         chartConfig={chartConfig}
-        verticalLabelRotation={30}
+        fromZero
+        yAxisLabel=""
+        // yAxisSuffix="KES"
       />
-      {/* <View style={styles.card}>
-        <Text style={styles.cardTitle}>Total Expenditure</Text>
-        <Text style={styles.cardContent}>
-          KES {generalReport.expenditure.toFixed(2)}
-        </Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Total Income</Text>
-        <Text style={styles.cardContent}>
-          KES {generalReport.income.toFixed(2)}
-        </Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Net Profit/Loss</Text>
-        <Text style={styles.cardContent}>
-          {netProfitOrLoss >= 0
-            ? `KES ${netProfitOrLoss.toFixed(2)}`
-            : `-KES ${Math.abs(netProfitOrLoss.toFixed(2))}`}
-        </Text>
-      </View> */}
     </ScrollView>
   );
 };
@@ -194,7 +177,7 @@ const chartConfig = {
   backgroundColor: "#ffffff",
   backgroundGradientFrom: "#ffffff",
   backgroundGradientTo: "#ffffff",
-  decimalPlaces: 2,
+  decimalPlaces: 0,
   color: (opacity = 1) => `rgba(92, 45, 145, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(92, 45, 145, ${opacity})`,
   style: {
@@ -223,29 +206,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
-  card: {
-    backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 8,
-    marginVertical: 8,
-    elevation: 3,
-    alignItems: "center",
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  cardContent: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#5C2D91",
-  },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+  chartStyle: { marginLeft: -16 },
 });
 
 export default ReportsScreen;
