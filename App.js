@@ -7,7 +7,7 @@ import LoginScreen from "./screens/users/LoginScreen";
 import RegisterScreen from "./screens/users/RegisterScreen";
 import HomeScreen from "./screens/Home/HomeScreen";
 import ReportsScreen from "./screens/Reports/ReportsScreen";
-import RegisterLandsScreen from "./screens/farms/RegisterLandScreen";
+import RegisterLandScreen from "./screens/farms/RegisterLandScreen"; // Updated import
 import LeasedOwnedToggleScreen from "./screens/farms/LeasedOwnedToggleScreen";
 import CustomHeader from "./components/CustomHeader";
 import { PaperProvider } from "react-native-paper";
@@ -45,7 +45,7 @@ const RegisterLandStack = ({ navigation }) => (
   <Stack.Navigator>
     <Stack.Screen
       name="RegisterLandScreen"
-      component={RegisterLandsScreen}
+      component={RegisterLandScreen} // Ensure correct component name
       options={{
         header: () => (
           <CustomHeader title="Register Land" navigation={navigation} />
@@ -77,6 +77,15 @@ const LandsStack = ({ navigation }) => (
       component={FarmDetails}
       options={{
         header: () => <CustomHeader title="Details" navigation={navigation} />,
+      }}
+    />
+    <Stack.Screen
+      name="UpdateLandScreen" // Adding RegisterScreen here for navigation
+      component={RegisterLandScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Update Land" navigation={navigation} />
+        ),
       }}
     />
   </Stack.Navigator>

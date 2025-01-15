@@ -13,12 +13,14 @@ import { useNavigation } from "@react-navigation/native";
 import ModalDropdown from "react-native-modal-dropdown";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import supabase from "../../supabaseClient";
+import { useTheme } from "../../context/ThemeContext";
 
 const LandList = ({ type }) => {
   const [lands, setLands] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
+  const { isDarkTheme } = useTheme();
 
   const fetchLands = async () => {
     setLoading(true);
@@ -27,9 +29,7 @@ const LandList = ({ type }) => {
         .from("lands")
         .select("*")
         .eq("type", type);
-
       if (error) throw error;
-
       setLands(data || []);
     } catch (error) {
       Alert.alert("Error", error.message);
@@ -58,15 +58,13 @@ const LandList = ({ type }) => {
   };
 
   const handleOptionSelect = (index, land) => {
-    console.log("Selected option index: ", index);
-    if (index === 0) {
-      // Handle update actiong
+    console.log("handleOptionSelect called with index:", index);
+    console.log("handleOptionSelect called with land:", land);
+    if (parseInt(index) === 0) {
       const routeName = "RegisterScreen";
-      console.log("Navigating to RegisterScreen with land: ", land);
+      console.log("Navigating to RegisterScreen with land:", land);
       navigation.navigate(routeName, { land });
-    } else if (index === "1") {
-      // Handle delete action
-      console.log("Prompting delete confirmation for land: ", land);
+    } else if (parseInt(index) === 1) {
       Alert.alert(
         "Confirm Delete",
         "Are you sure you want to delete this land?",
@@ -76,7 +74,7 @@ const LandList = ({ type }) => {
             text: "Delete",
             style: "destructive",
             onPress: () => {
-              console.log("Delete confirmed for land: ", land);
+              console.log("Delete confirmed for land:", land);
               deleteLand(land.id);
             },
           },
@@ -86,14 +84,14 @@ const LandList = ({ type }) => {
   };
 
   const deleteLand = async (landId) => {
-    console.log("Deleting land with ID: ", landId);
+    console.log("Deleting land with ID:", landId);
     try {
       const { error } = await supabase.from("lands").delete().eq("id", landId);
       if (error) throw error;
       console.log("Land deleted successfully.");
-      fetchLands(); // Refresh the list after deleting
+      fetchLands();
     } catch (error) {
-      console.error("Error deleting land: ", error.message);
+      console.error("Error deleting land:", error.message);
       Alert.alert("Error", error.message);
     }
   };
@@ -110,13 +108,14 @@ const LandList = ({ type }) => {
     const daysRemaining = getRemainingDays(item.lease_end);
 
     return (
-      <View style={styles.card}>
+      <View
+        style={[styles.card, isDarkTheme ? styles.darkCard : styles.lightCard]}>
         {item.lease_end && (
           <View style={styles.badgeContainer}>
             <Text
               style={[
                 styles.badge,
-                daysRemaining <= 30 && styles.badgeWarning,
+                daysRemaining <= 30 ? styles.badgeWarning : null,
               ]}>
               {daysRemaining > 0 ? `${daysRemaining}d` : "Expired"}
             </Text>
@@ -125,11 +124,25 @@ const LandList = ({ type }) => {
         <View style={styles.cardContent}>
           <TouchableOpacity
             onPress={() => goToFarmDetails(item.landName, item.id)}>
-            <Text style={styles.landName}>{item.landName}</Text>
-            <Text>Location: {item.location}</Text>
-            <Text>Size: {item.size} acres</Text>
-            <Text>Lease Start: {item.lease_start || "N/A"}</Text>
-            <Text>Lease End: {item.lease_end || "N/A"}</Text>
+            <Text
+              style={[
+                styles.landName,
+                isDarkTheme ? styles.darkText : styles.lightText,
+              ]}>
+              {item.landName}
+            </Text>
+            <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+              Location: {item.location}
+            </Text>
+            <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+              Size: {item.size} acres
+            </Text>
+            <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+              Lease Start: {item.lease_start || "N/A"}
+            </Text>
+            <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+              Lease End: {item.lease_end || "N/A"}
+            </Text>
           </TouchableOpacity>
           <ModalDropdown
             options={["Update", "Delete"]}
@@ -161,7 +174,13 @@ const LandList = ({ type }) => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       ListEmptyComponent={
-        <Text style={styles.emptyMessage}>No {type} lands found.</Text>
+        <Text
+          style={[
+            styles.emptyMessage,
+            isDarkTheme ? styles.darkText : styles.lightText,
+          ]}>
+          No {type} lands found.
+        </Text>
       }
     />
   );
@@ -177,10 +196,15 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 5,
     borderRadius: 8,
-    backgroundColor: "#ffffff",
     elevation: 3,
     margin: 6,
     position: "relative",
+  },
+  darkCard: {
+    backgroundColor: "black",
+  },
+  lightCard: {
+    backgroundColor: "white",
   },
   badgeContainer: {
     position: "absolute",
@@ -211,11 +235,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
+  darkText: {
+    color: "white",
+  },
+  lightText: {
+    color: "black",
+  },
   emptyMessage: {
     textAlign: "center",
     marginTop: 20,
     fontSize: 16,
-    color: "gray",
   },
   optionsButton: {
     alignItems: "center",

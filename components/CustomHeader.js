@@ -4,23 +4,15 @@ import { Menu } from "react-native-paper";
 import Icon from "react-native-vector-icons/Feather";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import supabase from "../supabaseClient";
-// import { useTheme } from "../context/ThemeContext";
-import { useColorScheme } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 
 const CustomHeader = ({ title, navigation }) => {
-  // const { theme, toggleTheme } = useTheme();
   const [visible, setVisible] = useState(false);
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
-  const theme = useColorScheme();
-  const [isDarkTheme, setIsDarkTheme] = useState(theme === "dark");
-
-  const toggleTheme = () => {
-    setIsDarkTheme((prevTheme) => !prevTheme);
-  };
-
-  // Use isDarkTheme to conditionally set the theme in your components
+  const { isDarkTheme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     Alert.alert("Hold on!", "Are you sure you want to logout?", [
@@ -37,24 +29,19 @@ const CustomHeader = ({ title, navigation }) => {
   };
 
   return (
-    <View
+    <SafeAreaView
       style={[
         styles.headerContainer,
-        isDarkTheme
-          ? { backgroundColor: "black" }
-          : { backgroundColor: "white" },
-      ]}>
+        isDarkTheme ? styles.darkBackground : styles.lightBackground,
+      ]}
+      edges={["top", "left", "right"]}>
       <TouchableOpacity onPress={() => navigation.openDrawer()}>
-        <Icon
-          name="menu"
-          size={25}
-          color={isDarkTheme ? { color: "white" } : { color: "black" }}
-        />
+        <Icon name="menu" size={25} color={isDarkTheme ? "white" : "black"} />
       </TouchableOpacity>
       <Text
         style={[
           styles.title,
-          isDarkTheme ? { color: "white" } : { color: "black" },
+          isDarkTheme ? styles.darkText : styles.lightText,
         ]}>
         {title}
       </Text>
@@ -71,13 +58,12 @@ const CustomHeader = ({ title, navigation }) => {
         <Menu.Item onPress={handleLogout} title="Logout" />
         <Menu.Item onPress={toggleTheme} title="Toggle Dark Mode" />
       </Menu>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   headerContainer: {
-    marginTop: 39,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -86,6 +72,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  darkBackground: {
+    backgroundColor: "black",
+  },
+  lightBackground: {
+    backgroundColor: "white",
+  },
+  darkText: {
+    color: "white",
+  },
+  lightText: {
+    color: "black",
   },
   avatar: {
     width: 35,
