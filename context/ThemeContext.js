@@ -11,8 +11,23 @@ export const ThemeProvider = ({ children }) => {
     setIsDarkTheme((prevTheme) => !prevTheme);
   };
 
+  const themeStyles = {
+    dark: {
+      background: "#000000",
+      text: "#FFFFFF",
+      border: "#666666",
+    },
+    light: {
+      background: "#FFFFFF",
+      text: "#000000",
+      border: "#DDDDDD",
+    },
+  };
+
+  const currentTheme = isDarkTheme ? themeStyles.dark : themeStyles.light;
+
   return (
-    <ThemeContext.Provider value={{ isDarkTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ isDarkTheme, toggleTheme, currentTheme }}>
       {children}
     </ThemeContext.Provider>
   );

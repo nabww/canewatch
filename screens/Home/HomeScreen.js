@@ -9,10 +9,12 @@ import {
   RefreshControl,
 } from "react-native";
 import supabase from "../../supabaseClient";
+import { useTheme } from "../../context/ThemeContext";
 
 const HomeScreen = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isDarkTheme } = useTheme();
 
   useEffect(() => {
     fetchRecentActivities();
@@ -47,14 +49,30 @@ const HomeScreen = () => {
   };
 
   const renderActivityItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.activityType}>{item.type || "Unknown Activity"}</Text>
-      <Text style={styles.date}>
+    <View
+      style={[styles.card, isDarkTheme ? styles.darkCard : styles.lightCard]}>
+      <Text
+        style={[
+          styles.activityType,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        {item.type || "Unknown Activity"}
+      </Text>
+      <Text
+        style={[styles.date, isDarkTheme ? styles.darkText : styles.lightText]}>
         {item.date ? new Date(item.date).toDateString() : "No Date"}
       </Text>
-      <Text>Land: {item.lands?.landName || "N/A"}</Text>
-      <Text>Status: {item.status || "N/A"}</Text>
-      {item.cost && <Text>Cost: KES {item.cost}</Text>}
+      <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+        Land: {item.lands?.landName || "N/A"}
+      </Text>
+      <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+        Status: {item.status || "N/A"}
+      </Text>
+      {item.cost && (
+        <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+          Cost: KES {item.cost}
+        </Text>
+      )}
     </View>
   );
 
@@ -67,7 +85,11 @@ const HomeScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        isDarkTheme ? styles.darkBackground : styles.lightBackground,
+      ]}>
       {/* <Text style={styles.header}>Recent Activities</Text> */}
       <FlatList
         data={activities}
@@ -85,7 +107,11 @@ const HomeScreen = () => {
           activities.length === 0 ? styles.emptyList : styles.list
         }
         ListEmptyComponent={
-          <Text style={styles.emptyMessage}>
+          <Text
+            style={[
+              styles.emptyMessage,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
             No recent activities to display.
           </Text>
         }
@@ -97,8 +123,13 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9f9f9",
     padding: 16,
+  },
+  darkBackground: {
+    backgroundColor: "#000000",
+  },
+  lightBackground: {
+    backgroundColor: "#f9f9f9",
   },
   loaderContainer: {
     flex: 1,
@@ -121,25 +152,33 @@ const styles = StyleSheet.create({
   },
   emptyMessage: {
     fontSize: 16,
-    color: "#777",
     textAlign: "center",
+  },
+  darkText: {
+    color: "#FFFFFF",
+  },
+  lightText: {
+    color: "#000000",
   },
   card: {
     padding: 16,
     marginBottom: 10,
     borderRadius: 8,
-    backgroundColor: "#ffffff",
     elevation: 3,
+  },
+  darkCard: {
+    backgroundColor: "#333333",
+  },
+  lightCard: {
+    backgroundColor: "#ffffff",
   },
   activityType: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 4,
-    color: "#5C2D91",
   },
   date: {
     fontSize: 14,
-    color: "#777",
     marginBottom: 8,
   },
 });

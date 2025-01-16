@@ -14,6 +14,7 @@ import supabase from "../../supabaseClient";
 import SearchableDropdown from "../../components/SearchableDropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Input from "../../components/Input ";
+import { useTheme } from "../../context/ThemeContext";
 
 const HarvestScreen = () => {
   const [noOfUnits, setNoOfUnits] = useState("");
@@ -25,6 +26,8 @@ const HarvestScreen = () => {
   const [landName, setLandName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const { isDarkTheme } = useTheme();
 
   const handleSubmit = async () => {
     if (!noOfUnits || !valueAtHarvest || !date || !landId || !unit) {
@@ -80,10 +83,17 @@ const HarvestScreen = () => {
       key: "farmSelection",
       component: (
         <View>
-          <Text style={styles.label}>Select Farm</Text>
+          <Text
+            style={[
+              styles.label,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            Select Farm
+          </Text>
 
           <SearchableDropdown
             placeholder="Search to select a farm"
+            placeholderTextColor={isDarkTheme ? "#CCCCCC" : "#AAAAAA"}
             onSelect={(id, name) => {
               setLandId(id);
               setLandName(name);
@@ -96,11 +106,21 @@ const HarvestScreen = () => {
       key: "units",
       component: (
         <View>
-          <Text style={styles.label}>Number of Units at Harvest</Text>
+          <Text
+            style={[
+              styles.label,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            Number of Units at Harvest
+          </Text>
 
           <Input
-            style={styles.input}
+            style={[
+              styles.input,
+              isDarkTheme ? styles.darkInput : styles.lightInput,
+            ]}
             placeholder="Number of Units"
+            placeholderTextColor={isDarkTheme ? "#CCCCCC" : "#AAAAAA"}
             keyboardType="numeric"
             value={noOfUnits}
             onChangeText={setNoOfUnits}
@@ -112,7 +132,13 @@ const HarvestScreen = () => {
       key: "unitSelection",
       component: (
         <View>
-          <Text style={styles.label}>Unit of Harvest</Text>
+          <Text
+            style={[
+              styles.label,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            Unit of Harvest
+          </Text>
 
           <SearchableDropdown
             options={["bags", "kilograms", "tons"]}
@@ -120,7 +146,11 @@ const HarvestScreen = () => {
             defaultIndex={0} // Default to 'bags'
             defaultValue="bags"
             placeholder="Unit of harvest e.g. bags, tonnes..."
-            style={styles.dropdown}
+            placeholderTextColor={isDarkTheme ? "#CCCCCC" : "#AAAAAA"}
+            style={[
+              styles.dropdown,
+              isDarkTheme ? styles.darkInput : styles.lightInput,
+            ]}
           />
         </View>
       ),
@@ -129,11 +159,21 @@ const HarvestScreen = () => {
       key: "value",
       component: (
         <View>
-          <Text style={styles.label}>Value per Unit</Text>
+          <Text
+            style={[
+              styles.label,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            Value per Unit
+          </Text>
 
           <Input
-            style={styles.input}
+            style={[
+              styles.input,
+              isDarkTheme ? styles.darkInput : styles.lightInput,
+            ]}
             placeholder="Value at Harvest"
+            placeholderTextColor={isDarkTheme ? "#CCCCCC" : "#AAAAAA"}
             keyboardType="numeric"
             value={valueAtHarvest}
             onChangeText={setValueAtHarvest}
@@ -145,12 +185,26 @@ const HarvestScreen = () => {
       key: "date",
       component: (
         <View>
-          <Text style={styles.label}>Date of Harvest</Text>
+          <Text
+            style={[
+              styles.label,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            Date of Harvest
+          </Text>
 
           <TouchableOpacity
-            style={[styles.input, { justifyContent: "center" }]}
+            style={[
+              styles.input,
+              { justifyContent: "center" },
+              isDarkTheme ? styles.darkInput : styles.lightInput,
+            ]}
             onPress={() => setShowDatePicker(true)}>
-            <Text style={{ fontSize: 16, color: date ? "#000" : "#aaa" }}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: date ? (isDarkTheme ? "#FFF" : "#000") : "#aaa",
+              }}>
               {date || "Select Date"}
             </Text>
           </TouchableOpacity>
@@ -170,8 +224,13 @@ const HarvestScreen = () => {
       component: (
         <View>
           <TextInput
-            style={[styles.input, styles.notes]}
+            style={[
+              styles.input,
+              styles.notes,
+              isDarkTheme ? styles.darkInput : styles.lightInput,
+            ]}
             placeholder="Notes (optional)"
+            placeholderTextColor={isDarkTheme ? "#CCCCCC" : "#AAAAAA"}
             multiline
             value={notes}
             onChangeText={setNotes}
@@ -197,7 +256,10 @@ const HarvestScreen = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}>
+      style={[
+        styles.container,
+        isDarkTheme ? styles.darkBackground : styles.lightBackground,
+      ]}>
       <FlatList
         data={formData}
         keyExtractor={(item) => item.key}
@@ -211,16 +273,29 @@ const HarvestScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#F9F9FB",
     flex: 1,
   },
+  darkBackground: {
+    backgroundColor: "#000000",
+  },
+  lightBackground: {
+    backgroundColor: "#F9F9FB",
+  },
   input: {
-    backgroundColor: "#ffffff",
     padding: 12,
     borderRadius: 8,
     fontSize: 16,
     marginBottom: 16,
     borderWidth: 1,
+  },
+  darkInput: {
+    backgroundColor: "#333333",
+    color: "#FFFFFF",
+    borderColor: "#666666",
+  },
+  lightInput: {
+    backgroundColor: "#ffffff",
+    color: "#000000",
     borderColor: "#dddddd",
   },
   notes: {
@@ -250,12 +325,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 8,
   },
+  darkText: {
+    color: "#FFFFFF",
+  },
+  lightText: {
+    color: "#000000",
+  },
   dropdown: {
     padding: 12,
-    backgroundColor: "#ffffff",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#dddddd",
     marginBottom: 16,
   },
 });

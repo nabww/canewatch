@@ -2,7 +2,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import { ThemeProvider } from "./context/ThemeContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import LoginScreen from "./screens/users/LoginScreen";
 import RegisterScreen from "./screens/users/RegisterScreen";
 import HomeScreen from "./screens/Home/HomeScreen";
@@ -135,41 +135,51 @@ const HarvestStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
-// Drawer Navigator
-const DrawerNavigator = () => (
-  <Drawer.Navigator initialRouteName="DrawerHome">
-    <Drawer.Screen
-      name="DrawerHome"
-      component={HomeStack}
-      options={{ headerShown: false, title: "Home" }}
-    />
-    <Drawer.Screen
-      name="DrawerRegisterLand"
-      component={RegisterLandStack}
-      options={{ headerShown: false, title: "Register Land" }}
-    />
-    <Drawer.Screen
-      name="DrawerLands"
-      component={LandsStack}
-      options={{ headerShown: false, title: "View Lands" }}
-    />
-    <Drawer.Screen
-      name="DrawerActivities"
-      component={ActivityStack}
-      options={{ headerShown: false, title: "Record Activity" }}
-    />
-    <Drawer.Screen
-      name="DrawerHarvests"
-      component={HarvestStack}
-      options={{ headerShown: false, title: "Record Harvest" }}
-    />
-    <Drawer.Screen
-      name="DrawerReports"
-      component={ReportsStack}
-      options={{ headerShown: false, title: "View Reports" }}
-    />
-  </Drawer.Navigator>
-);
+const DrawerNavigator = () => {
+  const { currentTheme } = useTheme();
+
+  return (
+    <Drawer.Navigator
+      initialRouteName="DrawerHome"
+      screenOptions={{
+        drawerStyle: { backgroundColor: currentTheme.background },
+        drawerActiveTintColor: currentTheme.text,
+        drawerInactiveTintColor: currentTheme.text,
+        drawerItemStyle: { marginVertical: 5 },
+      }}>
+      <Drawer.Screen
+        name="DrawerHome"
+        component={HomeStack}
+        options={{ headerShown: false, title: "Home" }}
+      />
+      <Drawer.Screen
+        name="DrawerRegisterLand"
+        component={RegisterLandStack}
+        options={{ headerShown: false, title: "Register Land" }}
+      />
+      <Drawer.Screen
+        name="DrawerLands"
+        component={LandsStack}
+        options={{ headerShown: false, title: "View Lands" }}
+      />
+      <Drawer.Screen
+        name="DrawerActivities"
+        component={ActivityStack}
+        options={{ headerShown: false, title: "Record Activity" }}
+      />
+      <Drawer.Screen
+        name="DrawerHarvests"
+        component={HarvestStack}
+        options={{ headerShown: false, title: "Record Harvest" }}
+      />
+      <Drawer.Screen
+        name="DrawerReports"
+        component={ReportsStack}
+        options={{ headerShown: false, title: "View Reports" }}
+      />
+    </Drawer.Navigator>
+  );
+};
 
 // App Entry Point
 export default function App() {

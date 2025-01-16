@@ -7,10 +7,11 @@ import {
   Alert,
   ScrollView,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { BarChart } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
 import supabase from "../../supabaseClient";
+import { useTheme } from "../../context/ThemeContext";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -23,6 +24,8 @@ const ReportsScreen = () => {
   });
   const [farmNames, setFarmNames] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const { isDarkTheme } = useTheme();
 
   useEffect(() => {
     fetchReportsData();
@@ -137,43 +140,60 @@ const ReportsScreen = () => {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[
+        styles.container,
+        isDarkTheme ? styles.darkBackground : styles.lightBackground,
+      ]}
       refreshControl={
         <RefreshControl refreshing={loading} onRefresh={fetchReportsData} />
       }>
-      <Text style={styles.chartTitle}>Profit & Loss Overview</Text>
+      <Text
+        style={[
+          styles.chartTitle,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Profit & Loss Overview
+      </Text>
       <BarChart
         data={generateProfitLossData()}
         width={screenWidth - 32}
         height={220}
-        chartConfig={chartConfig}
+        chartConfig={isDarkTheme ? darkChartConfig : lightChartConfig}
         fromZero
       />
-      <Text style={styles.chartTitle}>Expenditure by Farm</Text>
+      <Text
+        style={[
+          styles.chartTitle,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Expenditure by Farm
+      </Text>
       <BarChart
         data={generateGraphData(expenditureByFarm)}
         width={screenWidth - 32}
         height={220}
-        chartConfig={chartConfig}
+        chartConfig={isDarkTheme ? darkChartConfig : lightChartConfig}
         fromZero
-        yAxisLabel=""
-        // yAxisSuffix=" KES"s
       />
-      <Text style={styles.chartTitle}>Expenditure by Activity</Text>
+      <Text
+        style={[
+          styles.chartTitle,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Expenditure by Activity
+      </Text>
       <BarChart
         data={generateGraphData(expenditureByActivity)}
         width={screenWidth - 32}
         height={220}
-        chartConfig={chartConfig}
+        chartConfig={isDarkTheme ? darkChartConfig : lightChartConfig}
         fromZero
-        yAxisLabel=""
-        // yAxisSuffix="KES"
       />
     </ScrollView>
   );
 };
 
-const chartConfig = {
+const lightChartConfig = {
   backgroundColor: "#ffffff",
   backgroundGradientFrom: "#ffffff",
   backgroundGradientTo: "#ffffff",
@@ -188,13 +208,47 @@ const chartConfig = {
     strokeWidth: "2",
     stroke: "#5C2D91",
   },
+  yLabelsOffset: -10,
+  xLabelsOffset: -10,
+  propsForLabels: { rotation: 45 },
+};
+
+const darkChartConfig = {
+  backgroundColor: "#333333",
+  backgroundGradientFrom: "#333333",
+  backgroundGradientTo: "#333333",
+  decimalPlaces: 0,
+  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  style: {
+    borderRadius: 16,
+  },
+  propsForDots: {
+    r: "6",
+    strokeWidth: "2",
+    stroke: "#FFFFFF",
+  },
+  yLabelsOffset: -10,
+  xLabelsOffset: -10,
+  propsForLabels: { rotation: 45 },
 };
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
+  },
+  darkBackground: {
+    backgroundColor: "#000000",
+  },
+  lightBackground: {
     backgroundColor: "#F9F9FB",
+  },
+  darkText: {
+    color: "#FFFFFF",
+  },
+  lightText: {
+    color: "#000000",
   },
   header: {
     fontSize: 24,
