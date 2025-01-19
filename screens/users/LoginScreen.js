@@ -37,8 +37,8 @@ const LoginScreen = ({ navigation }) => {
           "supabase_session",
           JSON.stringify(data.session)
         );
-        alert("Login successful!");
-        navigation.replace("Drawer");
+        // alert("Login successful!");
+        navigation.replace("MainDrawer");
       } else {
         console.warn("No session returned from Supabase.");
       }
@@ -71,7 +71,8 @@ const LoginScreen = ({ navigation }) => {
               onChangeText={setPassword}
             />
             <Button title="Login" onPress={handleLogin} />
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("RegisterScreen")}>
               <Text style={styles.registerText}>
                 Don’t have an account? Register
               </Text>

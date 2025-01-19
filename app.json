@@ -7,7 +7,17 @@
     "icon": "../canewatch/assets/logo.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.canewatch"
+    },
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "45df26e4-e807-4356-acc6-d50fd5c8be61"
+      }
+    },
+    "android": {
+      "package": "com.canewatch"
     }
   }
 }
