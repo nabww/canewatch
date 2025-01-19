@@ -41,7 +41,7 @@ const HarvestScreen = () => {
       const { data, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      const userId = data?.user?.id; // Correctly access the user ID
+      const userId = data?.user?.id; 
       if (!userId) throw new Error("User not authenticated");
 
       const { error } = await supabase.from("harvests").insert({
@@ -51,7 +51,7 @@ const HarvestScreen = () => {
         date: date,
         notes: notes || null,
         land_id: landId,
-        user_id: userId, // Use the correct user ID
+        user_id: userId, 
       });
 
       if (error) throw error;

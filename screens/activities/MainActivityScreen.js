@@ -28,7 +28,7 @@ const MainActivityScreen = () => {
   const { isDarkTheme } = useTheme();
 
   const handleSaveActivity = async () => {
-    if (!selectedFarm || !activityType || !date || !cost) {
+    if (!selectedFarm || !activityType || !date) {
       Alert.alert("Validation Error", "All fields except Notes are required.");
       return;
     }
@@ -71,6 +71,13 @@ const MainActivityScreen = () => {
     if (selectedDate) {
       setDate(selectedDate.toISOString().split("T")[0]); // Format to YYYY-MM-DD
     }
+  };
+
+  const isFutureDate = () => {
+    if (!date) return false;
+    const today = new Date();
+    const selectedDate = new Date(date);
+    return selectedDate > today;
   };
 
   const formData = [
@@ -144,6 +151,7 @@ const MainActivityScreen = () => {
               mode="date"
               display="default"
               onChange={handleDateChange}
+              style={{ backgroundColor: "white" }}
             />
           )}
         </View>
@@ -194,7 +202,11 @@ const MainActivityScreen = () => {
           onPress={handleSaveActivity}
           disabled={loading}>
           <Text style={styles.buttonText}>
-            {loading ? "Submitting..." : "Save Activity"}
+            {loading
+              ? "Submitting..."
+              : isFutureDate()
+              ? "Schedule"
+              : "Save Activity"}
           </Text>
         </TouchableOpacity>
       ),

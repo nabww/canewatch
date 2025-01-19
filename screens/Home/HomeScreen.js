@@ -17,10 +17,10 @@ const HomeScreen = () => {
   const { isDarkTheme } = useTheme();
 
   useEffect(() => {
-    fetchRecentActivities();
+    fetchUpcomingActivities();
   }, []);
 
-  const fetchRecentActivities = async () => {
+  const fetchUpcomingActivities = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -35,12 +35,16 @@ const HomeScreen = () => {
           lands(landName)
         `
         )
-        .order("date", { ascending: false })
-        .limit(30);
+        .order("date", { ascending: true });
 
       if (error) throw error;
 
-      setActivities(data || []); // Ensure data is an array
+      const upcomingActivities = data.filter((activity) => {
+        const activityDate = new Date(activity.date);
+        return activityDate >= new Date();
+      });
+
+      setActivities(upcomingActivities || []); // Ensure data is an array
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -90,7 +94,7 @@ const HomeScreen = () => {
         styles.container,
         isDarkTheme ? styles.darkBackground : styles.lightBackground,
       ]}>
-      {/* <Text style={styles.header}>Recent Activities</Text> */}
+      {/* <Text style={styles.header}>Upcoming Activities</Text> */}
       <FlatList
         data={activities}
         keyExtractor={(item, index) =>
@@ -100,7 +104,7 @@ const HomeScreen = () => {
         refreshControl={
           <RefreshControl
             refreshing={loading}
-            onRefresh={fetchRecentActivities}
+            onRefresh={fetchUpcomingActivities}
           />
         }
         contentContainerStyle={
@@ -112,7 +116,7 @@ const HomeScreen = () => {
               styles.emptyMessage,
               isDarkTheme ? styles.darkText : styles.lightText,
             ]}>
-            No recent activities to display.
+            No upcoming activities to display.
           </Text>
         }
       />

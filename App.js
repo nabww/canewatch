@@ -15,6 +15,7 @@ import { Keyboard, TouchableWithoutFeedback } from "react-native";
 import MainActivityScreen from "./screens/activities/MainActivityScreen";
 import FarmDetails from "./screens/activities/FarmDetails";
 import HarvestScreen from "./screens/activities/HarvestScreen";
+import CustomizeDashboardScreen from "./screens/Reports/CustomizeDashBoardScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -33,7 +34,7 @@ const HomeStack = ({ navigation }) => (
       component={HomeScreen}
       options={{
         header: () => (
-          <CustomHeader title="Activity Feed" navigation={navigation} />
+          <CustomHeader title="Upcoming Activities" navigation={navigation} />
         ),
       }}
     />
@@ -76,7 +77,9 @@ const LandsStack = ({ navigation }) => (
       name="OwnedFarmDetails"
       component={FarmDetails}
       options={{
-        header: () => <CustomHeader title="Details" navigation={navigation} />,
+        header: () => (
+          <CustomHeader title="All Activities" navigation={navigation} />
+        ),
       }}
     />
     <Stack.Screen
@@ -135,6 +138,20 @@ const HarvestStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
+const CustomizeReportStack = ({ navigation }) => (
+  <Stack.Navigator>
+    <Stack.Screen
+      name="CustomizeS=DashBoardScreen"
+      component={CustomizeDashboardScreen}
+      options={{
+        header: () => (
+          <CustomHeader title="Customize Report Dashboard" navigation={navigation} />
+        ),
+      }}
+    />
+  </Stack.Navigator>
+);
+
 const DrawerNavigator = () => {
   const { currentTheme } = useTheme();
 
@@ -177,6 +194,11 @@ const DrawerNavigator = () => {
         component={ReportsStack}
         options={{ headerShown: false, title: "View Reports" }}
       />
+      <Drawer.Screen
+        name="Customize Reports"
+        component={CustomizeReportStack}
+        options={{ headerShown: false, title: "Customize Reports" }}
+      />
     </Drawer.Navigator>
   );
 };
@@ -203,6 +225,10 @@ export default function App() {
                 name="MainDrawer"
                 component={DrawerNavigator}
                 options={{ headerShown: false, gestureEnabled: false }}
+              />
+              <Stack.Screen
+                name="CustomizeDashboard"
+                component={CustomizeDashboardScreen}
               />
             </Stack.Navigator>
           </NavigationContainer>

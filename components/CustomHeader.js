@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  StatusBar,
+} from "react-native";
 import { Menu } from "react-native-paper";
 import Icon from "react-native-vector-icons/Feather";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,6 +42,7 @@ const CustomHeader = ({ title, navigation }) => {
         isDarkTheme ? styles.darkBackground : styles.lightBackground,
       ]}
       edges={["top", "left", "right"]}>
+      <StatusBar barStyle={isDarkTheme ? "light-content" : "dark-content"} />
       <TouchableOpacity onPress={() => navigation.openDrawer()}>
         <Icon name="menu" size={25} color={isDarkTheme ? "white" : "black"} />
       </TouchableOpacity>
