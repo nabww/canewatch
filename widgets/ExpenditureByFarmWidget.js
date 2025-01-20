@@ -79,7 +79,7 @@ const ExpenditureByFarmWidget = () => {
 
   return (
     <View>
-      <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+      <Text style={[isDarkTheme ? styles.darkText : styles.lightText]}>
         Expenditure by Farm in KES
       </Text>
       {loading ? (

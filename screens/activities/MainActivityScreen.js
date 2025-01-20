@@ -85,17 +85,27 @@ const MainActivityScreen = () => {
       key: "farmSelection",
       component: (
         <View>
+          {" "}
           <Text
             style={[
               styles.label,
               isDarkTheme ? styles.darkText : styles.lightText,
             ]}>
-            Select Farm
-          </Text>
+            {" "}
+            Select Farm{" "}
+          </Text>{" "}
           <SearchableDropdown
             placeholder="Search to select a farm"
             onSelect={(id) => setSelectedFarm(id)}
-          />
+            textInputStyle={isDarkTheme ? styles.darkInput : styles.lightInput}
+            itemStyle={isDarkTheme ? styles.darkItem : styles.lightItem}
+            itemTextStyle={
+              isDarkTheme ? styles.darkItemText : styles.lightItemText
+            }
+            containerStyle={
+              isDarkTheme ? styles.darkContainer : styles.lightContainer
+            }
+          />{" "}
         </View>
       ),
     },
@@ -181,17 +191,24 @@ const MainActivityScreen = () => {
     {
       key: "notes",
       component: (
-        <TextInput
-          placeholder="Notes (optional)"
-          multiline
-          style={[
-            styles.notes,
-            styles.input,
-            isDarkTheme ? styles.darkInput : styles.lightInput,
-          ]}
-          value={notes}
-          onChangeText={setNotes}
-        />
+        <View>
+          <Text style={[isDarkTheme ? styles.darkText : styles.lightText]}>
+            Notes
+          </Text>
+          <TextInput
+            placeholder="Notes (optional)"
+            multiline
+            style={[
+              styles.notes,
+              styles.input,
+              isDarkTheme
+                ? [styles.darkInput, styles.darkText]
+                : [styles.lightInput, styles.lightText],
+            ]}
+            value={notes}
+            onChangeText={setNotes}
+          />
+        </View>
       ),
     },
     {
@@ -288,9 +305,11 @@ const styles = StyleSheet.create({
   },
   darkText: {
     color: "#FFFFFF",
+    fontSize: 10,
   },
   lightText: {
     color: "#000000",
+    fontSize: 20,
   },
   darkBackground: {
     backgroundColor: "#000000",
@@ -298,6 +317,37 @@ const styles = StyleSheet.create({
   lightBackground: {
     backgroundColor: "#F9F9FB",
   },
+  lightItem: {
+    padding: 10,
+    marginTop: 2,
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D1D5DB",
+    borderWidth: 1,
+  },
+  darkItem: {
+    padding: 10,
+    marginTop: 2,
+    backgroundColor: "#1E1E1E",
+    borderColor: "#333333",
+    borderWidth: 1,
+  },
+  lightItemText: { color: "#000000" },
+  darkItemText: { color: "#FFFFFF" },
+  lightContainer: { backgroundColor: "#FFFFFF" },
+  darkContainer: { backgroundColor: "#1E1E1E" },
+  lightInput: {
+    borderColor: "#D1D5DB",
+    backgroundColor: "#FFFFFF",
+    color: "#000000",
+  },
+  darkInput: {
+    borderColor: "#333333",
+    backgroundColor: "#1E1E1E",
+    color: "#FFFFFF",
+  },
+  label: { fontSize: 16, marginBottom: 8 },
+  lightText: { color: "#000000" },
+  darkText: { color: "#FFFFFF" },
 });
 
 export default MainActivityScreen;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,6 +17,41 @@ const CustomizeDashboardScreen = () => {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { isDarkTheme } = useTheme();
+
+  useEffect(() => {
+    const fetchUserPreferences = async () => {
+      try {
+        // Fetch user ID from Supabase's auth module
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
+        if (authError || !user) {
+          console.error("Error fetching user:", authError);
+          throw new Error("User not authenticated");
+        }
+
+        const userId = user.id;
+
+        // Fetch user preferences from Supabase
+        const { data, error } = await supabase
+          .from("user_widgets")
+          .select("widget_id")
+          .eq("user_id", userId);
+
+        if (error) {
+          console.error("Error fetching user preferences:", error);
+          return;
+        }
+
+        setSelectedWidgets(data.map((item) => item.widget_id));
+      } catch (error) {
+        console.error("Error fetching user preferences:", error.message);
+      }
+    };
+
+    fetchUserPreferences();
+  }, []);
 
   const toggleWidgetSelection = (widgetId) => {
     setSelectedWidgets((prevState) =>
@@ -42,7 +77,7 @@ const CustomizeDashboardScreen = () => {
       const userId = user.id;
 
       setLoading(true);
-      // console.log(userId);
+
       // Clear existing preferences
       const { error: deleteError } = await supabase
         .from("user_widgets")
@@ -68,7 +103,7 @@ const CustomizeDashboardScreen = () => {
       }
 
       Alert.alert("Success", "Preferences saved successfully!");
-      navigation.goBack();
+      navigation.navigate("ReportsScreen");
     } catch (error) {
       console.error("Error saving preferences:", error);
       Alert.alert(
@@ -97,13 +132,23 @@ const CustomizeDashboardScreen = () => {
           <TouchableOpacity
             style={[
               styles.widgetButton,
-              selectedWidgets.includes(item.id) && styles.selectedWidgetButton,
+              selectedWidgets.includes(item.id)
+                ? isDarkTheme
+                  ? styles.selectedDarkWidgetButton
+                  : styles.selectedLightWidgetButton
+                : isDarkTheme
+                ? styles.unselectedDarkWidgetButton
+                : styles.unselectedLightWidgetButton,
             ]}
             onPress={() => toggleWidgetSelection(item.id)}>
             <Text
               style={[
                 styles.widgetText,
-                isDarkTheme ? styles.darkText : styles.lightText,
+                selectedWidgets.includes(item.id)
+                  ? styles.selectedText
+                  : isDarkTheme
+                  ? styles.unselectedDarkText
+                  : styles.unselectedLightText,
               ]}>
               {item.name}
             </Text>
@@ -139,14 +184,37 @@ const styles = StyleSheet.create({
   widgetButton: {
     padding: 16,
     marginVertical: 8,
-    backgroundColor: "#f9f9f9",
     borderRadius: 8,
   },
-  selectedWidgetButton: {
+  selectedLightWidgetButton: {
     backgroundColor: "#5C2D91",
+    color: "#FFFFFF",
+  },
+  selectedDarkWidgetButton: {
+    backgroundColor: "#5C2D91",
+    color: "#FFFFFF",
+  },
+  unselectedLightWidgetButton: {
+    backgroundColor: "#FFFFFF",
+    borderColor: "#D1D5DB",
+    borderWidth: 1,
+  },
+  unselectedDarkWidgetButton: {
+    backgroundColor: "#333333",
+    borderColor: "#4F4F4F",
+    borderWidth: 1,
   },
   widgetText: {
     fontSize: 16,
+  },
+  selectedText: {
+    color: "#FFFFFF",
+  },
+  unselectedLightText: {
+    color: "#000000",
+  },
+  unselectedDarkText: {
+    color: "#FFFFFF",
   },
   saveButton: {
     padding: 16,
@@ -166,20 +234,11 @@ const styles = StyleSheet.create({
   lightBackground: {
     backgroundColor: "#ffffff",
   },
-  darkText: {
-    color: "#00000",
-  },
   darkTextButton: {
     color: "#ffffff",
   },
   lightTextButton: {
     color: "#ffffff",
-  },
-  lightText: {
-    color: "#000000",
-  },
-  darkWidgetButton: {
-    backgroundColor: "#333333",
   },
 });
 
