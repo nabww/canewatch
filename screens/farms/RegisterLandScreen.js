@@ -305,6 +305,7 @@ const styles = StyleSheet.create({
     margin: 5,
     borderWidth: 1,
     borderRadius: 5,
+    backgroundColor: "white",
   },
   leaseStatusText: {
     fontSize: 16,

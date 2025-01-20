@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,10 @@ const CustomHeader = ({ title, navigation }) => {
       },
     ]);
   };
+
+  useEffect(() => {
+    StatusBar.setBackgroundColor(isDarkTheme ? "black" : "white");
+  }, [isDarkTheme]);
 
   return (
     <SafeAreaView

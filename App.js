@@ -121,6 +121,18 @@ const ReportsStack = ({ navigation }) => (
         ),
       }}
     />
+    <Stack.Screen
+      name="CustomizeDashBoardScreen"
+      component={CustomizeDashboardScreen}
+      options={{
+        header: () => (
+          <CustomHeader
+            title="Customize Report Dashboard"
+            navigation={navigation}
+          />
+        ),
+      }}
+    />
   </Stack.Navigator>
 );
 
@@ -138,19 +150,19 @@ const HarvestStack = ({ navigation }) => (
   </Stack.Navigator>
 );
 
-const CustomizeReportStack = ({ navigation }) => (
-  <Stack.Navigator>
-    <Stack.Screen
-      name="CustomizeS=DashBoardScreen"
-      component={CustomizeDashboardScreen}
-      options={{
-        header: () => (
-          <CustomHeader title="Customize Report Dashboard" navigation={navigation} />
-        ),
-      }}
-    />
-  </Stack.Navigator>
-);
+// const CustomizeReportStack = ({ navigation }) => (
+//   <Stack.Navigator>
+//     <Stack.Screen
+//       name="CustomizeDashBoardScreen"
+//       component={CustomizeDashboardScreen}
+//       options={{
+//         header: () => (
+//           <CustomHeader title="Customize Report Dashboard" navigation={navigation} />
+//         ),
+//       }}
+//     />
+//   </Stack.Navigator>
+// );
 
 const DrawerNavigator = () => {
   const { currentTheme } = useTheme();
@@ -194,11 +206,11 @@ const DrawerNavigator = () => {
         component={ReportsStack}
         options={{ headerShown: false, title: "View Reports" }}
       />
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="Customize Reports"
         component={CustomizeReportStack}
         options={{ headerShown: false, title: "Customize Reports" }}
-      />
+      /> */}
     </Drawer.Navigator>
   );
 };
