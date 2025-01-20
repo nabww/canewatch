@@ -10,11 +10,13 @@ import {
 import { availableWidgets } from "../../widgets/widgets";
 import { useNavigation } from "@react-navigation/native";
 import supabase from "../../supabaseClient";
+import { useTheme } from "../../context/ThemeContext";
 
 const CustomizeDashboardScreen = () => {
   const [selectedWidgets, setSelectedWidgets] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const { isDarkTheme } = useTheme();
 
   const toggleWidgetSelection = (widgetId) => {
     setSelectedWidgets((prevState) =>
@@ -40,7 +42,7 @@ const CustomizeDashboardScreen = () => {
       const userId = user.id;
 
       setLoading(true);
-      console.log(userId);
+      // console.log(userId);
       // Clear existing preferences
       const { error: deleteError } = await supabase
         .from("user_widgets")
@@ -79,8 +81,12 @@ const CustomizeDashboardScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
+    <View
+      style={[
+        styles.container,
+        isDarkTheme ? styles.darkBackground : styles.lightBackground,
+      ]}>
+      <Text style={[styles.title]}>
         This is a list of available widgets. Please select the ones you'd
         like...
       </Text>
@@ -94,7 +100,13 @@ const CustomizeDashboardScreen = () => {
               selectedWidgets.includes(item.id) && styles.selectedWidgetButton,
             ]}
             onPress={() => toggleWidgetSelection(item.id)}>
-            <Text style={styles.widgetText}>{item.name}</Text>
+            <Text
+              style={[
+                styles.widgetText,
+                isDarkTheme ? styles.darkText : styles.lightText,
+              ]}>
+              {item.name}
+            </Text>
           </TouchableOpacity>
         )}
       />
@@ -102,7 +114,11 @@ const CustomizeDashboardScreen = () => {
         style={styles.saveButton}
         onPress={savePreferences}
         disabled={loading}>
-        <Text style={styles.saveButtonText}>
+        <Text
+          style={[
+            styles.saveButtonText,
+            isDarkTheme ? styles.darkTextButton : styles.lightTextButton,
+          ]}>
           {loading ? "Saving..." : "Save Preferences"}
         </Text>
       </TouchableOpacity>
@@ -143,6 +159,27 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  darkBackground: {
+    backgroundColor: "#000000",
+  },
+  lightBackground: {
+    backgroundColor: "#ffffff",
+  },
+  darkText: {
+    color: "#00000",
+  },
+  darkTextButton: {
+    color: "#ffffff",
+  },
+  lightTextButton: {
+    color: "#ffffff",
+  },
+  lightText: {
+    color: "#000000",
+  },
+  darkWidgetButton: {
+    backgroundColor: "#333333",
   },
 });
 

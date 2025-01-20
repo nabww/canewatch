@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, RefreshControl } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  Text,
+} from "react-native";
 import { availableWidgets } from "../../widgets/widgets";
 import supabase from "../../supabaseClient";
 import { useTheme } from "../../context/ThemeContext";
@@ -11,17 +17,34 @@ const ReportsScreen = () => {
 
   const fetchUserWidgets = async () => {
     setRefreshing(true);
-    const { data, error } = await supabase
-      .from("user_widgets")
-      .select("*")
-      .eq("user_id", supabase.auth.user().id);
+    try {
+      // Fetch user ID from Supabase's auth module
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error("User not authenticated");
+      }
+      const userId = user.id;
 
-    if (error) {
-      console.error("Error fetching user widgets:", error);
-    } else {
-      setUserWidgets(data || []);
+      // Fetch user widgets
+      const { data, error } = await supabase
+        .from("user_widgets")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Error fetching user widgets:", error);
+      } else {
+        console.log("Fetched user widgets:", data);
+        setUserWidgets(data || []);
+      }
+    } catch (error) {
+      console.error("Unexpected error fetching user widgets:", error);
+    } finally {
+      setRefreshing(false);
     }
-    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -37,12 +60,22 @@ const ReportsScreen = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={fetchUserWidgets} />
       }>
-      {userWidgets.map((widget) => {
-        const WidgetComponent = availableWidgets.find(
-          (w) => w.id === widget.widget_id
-        ).component;
-        return <WidgetComponent key={widget.widget_id} />;
-      })}
+      {userWidgets.length > 0 ? (
+        userWidgets.map((widget) => {
+          const WidgetComponent = availableWidgets.find(
+            (w) => w.id === widget.widget_id
+          )?.component;
+          if (!WidgetComponent) {
+            console.error("Widget not found:", widget.widget_id);
+            return null;
+          }
+          return <WidgetComponent key={widget.widget_id} />;
+        })
+      ) : (
+        <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+          No widgets selected.
+        </Text>
+      )}
     </ScrollView>
   );
 };
@@ -57,6 +90,12 @@ const styles = StyleSheet.create({
   },
   lightBackground: {
     backgroundColor: "#F9F9FB",
+  },
+  darkText: {
+    color: "#FFFFFF",
+  },
+  lightText: {
+    color: "#000000",
   },
 });
 
