@@ -12,18 +12,22 @@ import supabase from "../../supabaseClient";
 import Button from "../../components/Button";
 import Input from "../../components/Input ";
 import { useTheme } from "../../context/ThemeContext";
+import * as Location from "expo-location";
+import MapView, { Marker } from "react-native-maps";
 
 const RegisterLandScreen = ({ navigation, route }) => {
   const [landName, setLandName] = useState("");
   const [location, setLocation] = useState("");
   const [landSize, setLandSize] = useState("");
-  const [leaseStatus, setLeaseStatus] = useState(""); // initial state as empty string
+  const [leaseStatus, setLeaseStatus] = useState("");
   const [leaseStart, setLeaseStart] = useState(new Date());
   const [leaseEnd, setLeaseEnd] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
+  const [mapRegion, setMapRegion] = useState(null);
+  const [marker, setMarker] = useState(null);
 
   const { isDarkTheme } = useTheme();
 
@@ -38,7 +42,28 @@ const RegisterLandScreen = ({ navigation, route }) => {
       setLeaseEnd(land.lease_end ? new Date(land.lease_end) : new Date());
       setIsUpdate(true);
     }
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setMapRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
   }, [route.params]);
+
+  const handleMapPress = (event) => {
+    const { coordinate } = event.nativeEvent;
+    setMarker(coordinate);
+    setLocation(`${coordinate.latitude}, ${coordinate.longitude}`);
+  };
 
   const handleSaveLand = async () => {
     if (!landName || !location || !landSize || !leaseStatus) {
@@ -256,6 +281,16 @@ const RegisterLandScreen = ({ navigation, route }) => {
           )}
         </>
       )}
+      <Text
+        style={[
+          styles.label,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Select Farm Location on Map
+      </Text>
+      <MapView style={styles.map} region={mapRegion} onPress={handleMapPress}>
+        {marker && <Marker coordinate={marker} />}
+      </MapView>
       <Button
         onPress={handleSaveLand}
         title={
@@ -331,6 +366,11 @@ const styles = StyleSheet.create({
   },
   lightBackground: {
     backgroundColor: "#ffffff",
+  },
+  map: {
+    width: "100%",
+    height: 200,
+    marginBottom: 16,
   },
 });
 

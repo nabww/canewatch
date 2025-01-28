@@ -10,14 +10,31 @@ import {
 } from "react-native";
 import supabase from "../../supabaseClient";
 import { useTheme } from "../../context/ThemeContext";
+import { scheduleEventNotifications } from "../../notifications/notificationConfig";
+import * as Notifications from "expo-notifications";
 
 const HomeScreen = () => {
   const [activities, setActivities] = useState([]);
+  const [todayActivities, setTodayActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const { isDarkTheme } = useTheme();
 
   useEffect(() => {
     fetchUpcomingActivities();
+  }, []);
+
+  const requestNotificationPermissions = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission not granted",
+        "Allow notifications to receive updates."
+      );
+    }
+  };
+
+  useEffect(() => {
+    requestNotificationPermissions();
   }, []);
 
   const fetchUpcomingActivities = async () => {
@@ -39,12 +56,33 @@ const HomeScreen = () => {
 
       if (error) throw error;
 
+      console.log("Data from Supabase:", data); // Debugging: Log the data
+
       const upcomingActivities = data.filter((activity) => {
+        if (!activity.date) return false; // Skip activities with missing dates
         const activityDate = new Date(activity.date);
         return activityDate >= new Date();
       });
 
-      setActivities(upcomingActivities || []); // Ensure data is an array
+      setActivities(upcomingActivities || []);
+
+      // Filter activities for today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set time to midnight for accurate comparison
+
+      const todaysActivities = data.filter((activity) => {
+        if (!activity.date) return false; // Skip activities with missing dates
+        const activityDate = new Date(activity.date);
+        activityDate.setHours(0, 0, 0, 0); // Set time to midnight for accurate comparison
+        return activityDate.getTime() === today.getTime();
+      });
+
+      setTodayActivities(todaysActivities);
+
+      // Schedule notifications for each upcoming activity
+      upcomingActivities.forEach((activity) => {
+        scheduleEventNotifications(activity);
+      });
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -94,7 +132,45 @@ const HomeScreen = () => {
         styles.container,
         isDarkTheme ? styles.darkBackground : styles.lightBackground,
       ]}>
-      {/* <Text style={styles.header}>Upcoming Activities</Text> */}
+      <Text
+        style={[
+          styles.header,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Today's Activities
+      </Text>
+      <FlatList
+        data={todayActivities}
+        keyExtractor={(item, index) =>
+          item.land_id?.toString() || index.toString()
+        }
+        renderItem={renderActivityItem}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={fetchUpcomingActivities}
+          />
+        }
+        contentContainerStyle={
+          todayActivities.length === 0 ? styles.emptyList : styles.list
+        }
+        ListEmptyComponent={
+          <Text
+            style={[
+              styles.emptyMessage,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            No activities for today.
+          </Text>
+        }
+      />
+      <Text
+        style={[
+          styles.header,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Upcoming Activities
+      </Text>
       <FlatList
         data={activities}
         keyExtractor={(item, index) =>
