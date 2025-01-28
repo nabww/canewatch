@@ -5,6 +5,8 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Image,
+  ScrollView,
 } from "react-native";
 import supabase from "../../supabaseClient";
 import { useTheme } from "../../context/ThemeContext";
@@ -78,6 +80,35 @@ const FarmDetails = ({ route }) => {
         ]}>
         Cost: {item.cost ? `KES ${item.cost}` : "N/A"}
       </Text>
+
+      {/* Media Section */}
+      <Text
+        style={[
+          styles.mediaLabel,
+          isDarkTheme ? styles.darkText : styles.lightText,
+        ]}>
+        Media:
+      </Text>
+      {item.media_urls && item.media_urls.length > 0 ? (
+        <ScrollView horizontal style={styles.mediaContainer}>
+          {item.media_urls.map((url, index) => (
+            <Image
+              key={index}
+              source={{ uri: url }}
+              style={styles.mediaImage}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
+      ) : (
+        <Text
+          style={[
+            styles.noMediaText,
+            isDarkTheme ? styles.darkText : styles.lightText,
+          ]}>
+          No media uploaded.
+        </Text>
+      )}
     </View>
   );
 
@@ -165,6 +196,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     marginTop: 20,
+  },
+  mediaLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  mediaContainer: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  mediaImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  noMediaText: {
+    fontSize: 14,
+    fontStyle: "italic",
+    marginBottom: 10,
   },
   darkText: {
     color: "#FFFFFF",
