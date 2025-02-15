@@ -8,6 +8,8 @@ import {
   Platform,
   Alert,
   TextInput,
+  Image,
+  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import supabase from "../../supabaseClient";
@@ -15,6 +17,9 @@ import SearchableDropdown from "../../components/SearchableDropdown";
 import Input from "../../components/Input ";
 import { FlatList } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { Ionicons } from "@expo/vector-icons"; // Import icons
 
 const MainActivityScreen = () => {
   const [selectedFarm, setSelectedFarm] = useState("");
@@ -24,8 +29,70 @@ const MainActivityScreen = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
+  const [media, setMedia] = useState([]); // Array to store selected media files
   const { isDarkTheme } = useTheme();
+
+  // Function to handle file selection
+  const pickMedia = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "Please allow access to your media library."
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setMedia([...media, ...result.assets]);
+    }
+  };
+
+  // Function to delete a selected image
+  const deleteImage = (index) => {
+    const updatedMedia = media.filter((_, i) => i !== index);
+    setMedia(updatedMedia);
+  };
+
+  // Function to upload files to Supabase Storage
+  const uploadFiles = async (files) => {
+    const uploadedUrls = [];
+    for (const file of files) {
+      const { uri } = file;
+      const fileName = uri.split("/").pop();
+      const fileExt = fileName.split(".").pop();
+
+      const filePath = `user_${
+        (await supabase.auth.getUser()).data.user.id
+      }/${Date.now()}_${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from("activity-media")
+        .upload(filePath, {
+          uri,
+          type: `image/${fileExt}`,
+          name: fileName,
+        });
+
+      if (error) {
+        console.error("Error uploading file:", error);
+        continue;
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from("activity-media")
+        .getPublicUrl(data.path);
+
+      uploadedUrls.push(publicUrl.publicUrl);
+    }
+    return uploadedUrls;
+  };
 
   const handleSaveActivity = async () => {
     if (!selectedFarm || !activityType || !date) {
@@ -38,8 +105,11 @@ const MainActivityScreen = () => {
       const { data, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      const userId = data?.user?.id; // Correctly accessing the user ID
+      const userId = data?.user?.id;
       if (!userId) throw new Error("User not authenticated");
+
+      // Upload media files and get their URLs
+      const mediaUrls = media.length > 0 ? await uploadFiles(media) : [];
 
       const activityData = {
         land_id: selectedFarm,
@@ -48,6 +118,7 @@ const MainActivityScreen = () => {
         cost: parseFloat(cost),
         notes: notes || null,
         user_id: userId,
+        media_urls: mediaUrls, // Store media URLs
       };
 
       const { error } = await supabase.from("activities").insert(activityData);
@@ -59,6 +130,7 @@ const MainActivityScreen = () => {
       setDate("");
       setCost("");
       setNotes("");
+      setMedia([]); // Clear selected media
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -69,7 +141,7 @@ const MainActivityScreen = () => {
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setDate(selectedDate.toISOString().split("T")[0]); // Format to YYYY-MM-DD
+      setDate(selectedDate.toISOString().split("T")[0]);
     }
   };
 
@@ -85,15 +157,13 @@ const MainActivityScreen = () => {
       key: "farmSelection",
       component: (
         <View>
-          {" "}
           <Text
             style={[
               styles.label,
               isDarkTheme ? styles.darkText : styles.lightText,
             ]}>
-            {" "}
-            Select Farm{" "}
-          </Text>{" "}
+            Select Farm
+          </Text>
           <SearchableDropdown
             placeholder="Search to select a farm"
             onSelect={(id) => setSelectedFarm(id)}
@@ -105,7 +175,7 @@ const MainActivityScreen = () => {
             containerStyle={
               isDarkTheme ? styles.darkContainer : styles.lightContainer
             }
-          />{" "}
+          />
         </View>
       ),
     },
@@ -212,6 +282,43 @@ const MainActivityScreen = () => {
       ),
     },
     {
+      key: "media",
+      component: (
+        <View>
+          <Text
+            style={[
+              styles.label,
+              isDarkTheme ? styles.darkText : styles.lightText,
+            ]}>
+            Upload Media (Optional)
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              styles.mediaButton,
+              isDarkTheme ? styles.darkInput : styles.lightInput,
+            ]}
+            onPress={pickMedia}>
+            <Text style={isDarkTheme ? styles.darkText : styles.lightText}>
+              Select Media
+            </Text>
+          </TouchableOpacity>
+          <ScrollView horizontal>
+            {media.map((item, index) => (
+              <View key={index} style={styles.mediaContainer}>
+                <Image source={{ uri: item.uri }} style={styles.mediaPreview} />
+                <TouchableOpacity
+                  style={styles.deleteIcon}
+                  onPress={() => deleteImage(index)}>
+                  <Ionicons name="close-circle" size={24} color="red" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      ),
+    },
+    {
       key: "submit",
       component: (
         <TouchableOpacity
@@ -282,6 +389,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
+  mediaButton: {
+    marginBottom: 16,
+  },
   buttonDisabled: {
     backgroundColor: "#999999",
   },
@@ -294,9 +404,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 2,
   },
-  notesInput: {
+  mediaContainer: {
+    position: "relative",
+    marginRight: 10,
+  },
+  mediaPreview: {
+    width: 100,
     height: 100,
-    textAlignVertical: "top",
+    borderRadius: 8,
+  },
+  deleteIcon: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    backgroundColor: "white",
+    borderRadius: 12,
   },
   label: {
     fontSize: 16,
@@ -305,11 +427,9 @@ const styles = StyleSheet.create({
   },
   darkText: {
     color: "#FFFFFF",
-    fontSize: 10,
   },
   lightText: {
     color: "#000000",
-    fontSize: 20,
   },
   darkBackground: {
     backgroundColor: "#000000",
@@ -335,19 +455,6 @@ const styles = StyleSheet.create({
   darkItemText: { color: "#FFFFFF" },
   lightContainer: { backgroundColor: "#FFFFFF" },
   darkContainer: { backgroundColor: "#1E1E1E" },
-  lightInput: {
-    borderColor: "#D1D5DB",
-    backgroundColor: "#FFFFFF",
-    color: "#000000",
-  },
-  darkInput: {
-    borderColor: "#333333",
-    backgroundColor: "#1E1E1E",
-    color: "#FFFFFF",
-  },
-  label: { fontSize: 16, marginBottom: 8 },
-  lightText: { color: "#000000" },
-  darkText: { color: "#FFFFFF" },
 });
 
 export default MainActivityScreen;

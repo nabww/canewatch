@@ -4,7 +4,7 @@
     "slug": "canewatch",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "../canewatch/assets/logo.png",
+    "icon": "../canewatch/assets/logo2.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,

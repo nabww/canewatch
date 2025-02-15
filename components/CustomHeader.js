@@ -16,10 +16,32 @@ import { useTheme } from "../context/ThemeContext";
 
 const CustomHeader = ({ title, navigation }) => {
   const [visible, setVisible] = useState(false);
+  const [initials, setInitials] = useState("");
+
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
   const { isDarkTheme, toggleTheme } = useTheme();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data.user) {
+        const email = data.user.email;
+        const nameParts = email.split("@")[0].split(".");
+        const userInitials = nameParts
+          .map((part) => part[0].toUpperCase())
+          .join("");
+        setInitials(userInitials);
+      }
+      if (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+    StatusBar.setBackgroundColor(isDarkTheme ? "black" : "white");
+  }, [isDarkTheme]);
 
   const handleLogout = () => {
     Alert.alert("Hold on!", "Are you sure you want to logout?", [
@@ -35,10 +57,6 @@ const CustomHeader = ({ title, navigation }) => {
     ]);
   };
 
-  useEffect(() => {
-    StatusBar.setBackgroundColor(isDarkTheme ? "black" : "white");
-  }, [isDarkTheme]);
-
   return (
     <SafeAreaView
       style={[
@@ -47,9 +65,11 @@ const CustomHeader = ({ title, navigation }) => {
       ]}
       edges={["top", "left", "right"]}>
       <StatusBar barStyle={isDarkTheme ? "light-content" : "dark-content"} />
-      <TouchableOpacity onPress={() => navigation.openDrawer()}>
-        <Icon name="menu" size={25} color={isDarkTheme ? "white" : "black"} />
-      </TouchableOpacity>
+      <View style={styles.leftContainer}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Icon name="menu" size={25} color={isDarkTheme ? "white" : "black"} />
+        </TouchableOpacity>
+      </View>
       <Text
         style={[
           styles.title,
@@ -57,19 +77,31 @@ const CustomHeader = ({ title, navigation }) => {
         ]}>
         {title}
       </Text>
-      <Menu
-        visible={visible}
-        onDismiss={closeMenu}
-        anchor={
-          <TouchableOpacity onPress={openMenu}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>UN</Text>
-            </View>
-          </TouchableOpacity>
-        }>
-        <Menu.Item onPress={handleLogout} title="Logout" />
-        <Menu.Item onPress={toggleTheme} title="Toggle Dark Mode" />
-      </Menu>
+      <View style={styles.rightContainer}>
+        <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
+          <Icon
+            name={isDarkTheme ? "sun" : "moon"}
+            size={24}
+            color={isDarkTheme ? "#FFD700" : "#5C2D91"}
+          />
+        </TouchableOpacity>
+        <Menu
+          visible={visible}
+          onDismiss={closeMenu}
+          anchor={
+            <TouchableOpacity onPress={openMenu}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+            </TouchableOpacity>
+          }>
+          <Menu.Item onPress={handleLogout} title="Logout" />
+          <Menu.Item
+            onPress={() => navigation.navigate("ProfileScreen")}
+            title="Profile"
+          />
+        </Menu>
+      </View>
     </SafeAreaView>
   );
 };
@@ -81,9 +113,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 10,
   },
+  leftContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   title: {
     fontSize: 20,
     fontWeight: "bold",
+  },
+  rightContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   darkBackground: {
     backgroundColor: "black",
@@ -96,6 +136,9 @@ const styles = StyleSheet.create({
   },
   lightText: {
     color: "black",
+  },
+  themeToggle: {
+    marginRight: 15,
   },
   avatar: {
     width: 35,

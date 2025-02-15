@@ -75,15 +75,15 @@ const RegisterScreen = ({ navigation }) => {
                 color={isDarkTheme ? "#FFD700" : "#5C2D91"}
               />
             </TouchableOpacity>
-            <Text
+            {/* <Text
               style={[
                 styles.title,
                 isDarkTheme ? styles.darkText : styles.lightText,
               ]}>
               Register for CaneWatch
-            </Text>
+            </Text> */}
             <Image
-              source={require("../../assets/logo.png")}
+              source={require("../../assets/logo2.png")}
               style={styles.logo}
             />
             <Input
@@ -114,7 +114,7 @@ const RegisterScreen = ({ navigation }) => {
                   styles.loginText,
                   isDarkTheme ? styles.darkText : styles.lightText,
                 ]}>
-                Already have an account? Login
+                Already have an account? Sign In
               </Text>
             </TouchableOpacity>
           </View>
@@ -147,11 +147,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 300,
+    height: 300,
     resizeMode: "contain",
     alignSelf: "center",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   themeToggle: {
     position: "absolute",
