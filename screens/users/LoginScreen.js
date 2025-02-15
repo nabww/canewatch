@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Input from "../../components/Input ";
 import Button from "../../components/Button";
 import supabase from "../../supabaseClient";
-import { useTheme} from "../../context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 import Icon from "react-native-vector-icons/Feather";
 
 const LoginScreen = ({ navigation }) => {
@@ -76,15 +76,15 @@ const LoginScreen = ({ navigation }) => {
                 color={isDarkTheme ? "#FFD700" : "#5C2D91"}
               />
             </TouchableOpacity>
-            <Text
+            {/* <Text
               style={[
                 styles.title,
                 isDarkTheme ? styles.darkText : styles.lightText,
               ]}>
-              Login to CaneWatch
-            </Text>
+              Login to FarmHand
+            </Text> */}
             <Image
-              source={require("../../assets/logo.png")}
+              source={require("../../assets/logo2.png")}
               style={styles.logo}
             />
             <Input
@@ -100,7 +100,7 @@ const LoginScreen = ({ navigation }) => {
               onChangeText={setPassword}
               style={isDarkTheme ? styles.darkInput : styles.lightInput}
             />
-            <Button title="Login" onPress={handleLogin} />
+            <Button title="Sign In" onPress={handleLogin} />
             <TouchableOpacity
               onPress={() => navigation.navigate("RegisterScreen")}>
               <Text
@@ -108,7 +108,7 @@ const LoginScreen = ({ navigation }) => {
                   styles.registerText,
                   isDarkTheme ? styles.darkText : styles.lightText,
                 ]}>
-                Don’t have an account? Register
+                Don’t have an account? Sign up
               </Text>
             </TouchableOpacity>
           </View>
@@ -141,11 +141,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 300,
+    height: 300,
     resizeMode: "contain",
     alignSelf: "center",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   themeToggle: {
     position: "absolute",

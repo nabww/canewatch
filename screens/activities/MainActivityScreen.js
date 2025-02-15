@@ -68,9 +68,13 @@ const MainActivityScreen = () => {
       const fileName = uri.split("/").pop();
       const fileExt = fileName.split(".").pop();
 
+      const filePath = `user_${
+        (await supabase.auth.getUser()).data.user.id
+      }/${Date.now()}_${fileName}`;
+
       const { data, error } = await supabase.storage
-        .from("activity-media") // Replace with your bucket name
-        .upload(`activity-media/${Date.now()}_${fileName}`, {
+        .from("activity-media")
+        .upload(filePath, {
           uri,
           type: `image/${fileExt}`,
           name: fileName,

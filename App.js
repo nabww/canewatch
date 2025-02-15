@@ -16,6 +16,7 @@ import MainActivityScreen from "./screens/activities/MainActivityScreen";
 import FarmDetails from "./screens/activities/FarmDetails";
 import HarvestScreen from "./screens/activities/HarvestScreen";
 import CustomizeDashboardScreen from "./screens/Reports/CustomizeDashBoardScreen";
+import ProfileScreen from "./screens/users/ProfileScreen";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -241,6 +242,11 @@ export default function App() {
               <Stack.Screen
                 name="CustomizeDashboard"
                 component={CustomizeDashboardScreen}
+              />
+              <Stack.Screen
+                name="ProfileScreen"
+                component={ProfileScreen}
+                options={{ title: "Profile" }}
               />
             </Stack.Navigator>
           </NavigationContainer>
