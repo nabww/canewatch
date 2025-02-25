@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   map: {
     width: "100%",
-    height: 200,
+    height: 300,
     marginBottom: 16,
   },
 });
