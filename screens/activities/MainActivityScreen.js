@@ -19,8 +19,8 @@ import { FlatList } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
-import { Ionicons } from "@expo/vector-icons"; // Import icons
-
+import * as ImageManipulator from "expo-image-manipulator"; // Add this
+import { Ionicons } from "@expo/vector-icons";
 const MainActivityScreen = () => {
   const [selectedFarm, setSelectedFarm] = useState("");
   const [activityType, setActivityType] = useState("");
@@ -29,22 +29,27 @@ const MainActivityScreen = () => {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [media, setMedia] = useState([]); // Array to store selected media files
+  const [media, setMedia] = useState([]);
   const { isDarkTheme } = useTheme();
 
-  // Function to handle file selection
-  const pickMedia = async () => {
+  const requestPermissions = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
         "Permission Denied",
         "Please allow access to your media library."
       );
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const pickMedia = async () => {
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 1,
     });
@@ -54,43 +59,105 @@ const MainActivityScreen = () => {
     }
   };
 
-  // Function to delete a selected image
   const deleteImage = (index) => {
     const updatedMedia = media.filter((_, i) => i !== index);
     setMedia(updatedMedia);
   };
 
-  // Function to upload files to Supabase Storage
   const uploadFiles = async (files) => {
     const uploadedUrls = [];
-    for (const file of files) {
-      const { uri } = file;
-      const fileName = uri.split("/").pop();
-      const fileExt = fileName.split(".").pop();
 
-      const filePath = `user_${
-        (await supabase.auth.getUser()).data.user.id
-      }/${Date.now()}_${fileName}`;
-
-      const { data, error } = await supabase.storage
-        .from("activity-media")
-        .upload(filePath, {
-          uri,
-          type: `image/${fileExt}`,
-          name: fileName,
-        });
-
-      if (error) {
-        console.error("Error uploading file:", error);
-        continue;
+    try {
+      const { data: sessionData, error: sessionError } =
+        await supabase.auth.getSession();
+      console.log("Session data:", sessionData, "Session error:", sessionError);
+      if (sessionError || !sessionData.session) {
+        console.error("Session error or no session:", sessionError?.message);
+        Alert.alert("Error", "User not authenticated.");
+        return [];
       }
 
-      const { data: publicUrl } = supabase.storage
-        .from("activity-media")
-        .getPublicUrl(data.path);
+      const userId = sessionData.session.user.id;
 
-      uploadedUrls.push(publicUrl.publicUrl);
+      // Improved network check
+      const isNetworkAvailable = await testNetwork();
+      if (!isNetworkAvailable) {
+        Alert.alert("Network Error", "Please check your internet connection.");
+        return [];
+      }
+
+      await testSupabase();
+
+      for (const file of files) {
+        let fileName;
+        try {
+          let uri = file.uri;
+          console.log("Processing file URI:", uri);
+
+          // Skip compression to preserve original format
+          fileName = uri.split("/").pop();
+          const fileExt = fileName.split(".").pop().toLowerCase();
+          const filePath = `user_${userId}/${Date.now()}_${fileName}`;
+
+          console.log("Fetching file as Blob...");
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch file: ${response.statusText}`);
+          }
+          console.log("Fetch response status:", response.status);
+          const blob = await response.blob();
+          console.log(
+            "Blob size:",
+            blob.size,
+            "Blob type:",
+            blob.type || "unknown"
+          );
+
+          const contentType =
+            fileExt === "jpeg" ? "image/jpeg" : `image/${fileExt}`;
+          console.log("Using contentType:", contentType);
+
+          console.log(
+            "Uploading to Supabase with path:",
+            filePath,
+            "Content Type:",
+            contentType
+          );
+          const { data, error } = await supabase.storage
+            .from("activity-media")
+            .upload(filePath, blob, {
+              contentType: contentType,
+            });
+
+          if (error) {
+            console.error(
+              "Supabase upload error details:",
+              JSON.stringify(error, null, 2)
+            );
+            throw error;
+          }
+
+          const { data: urlData } = supabase.storage
+            .from("activity-media")
+            .getPublicUrl(filePath);
+
+          console.log("Uploaded file URL:", urlData.publicUrl);
+          uploadedUrls.push(urlData.publicUrl);
+        } catch (fileError) {
+          console.error("Error uploading file:", fileError.message);
+          Alert.alert(
+            "Upload Error",
+            `Failed to upload ${fileName || "unknown file"}: ${
+              fileError.message
+            }`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Upload process error:", error.message);
+      Alert.alert("Error", "Failed to upload files.");
     }
+
     return uploadedUrls;
   };
 
@@ -108,17 +175,16 @@ const MainActivityScreen = () => {
       const userId = data?.user?.id;
       if (!userId) throw new Error("User not authenticated");
 
-      // Upload media files and get their URLs
       const mediaUrls = media.length > 0 ? await uploadFiles(media) : [];
 
       const activityData = {
         land_id: selectedFarm,
         type: activityType,
         date,
-        cost: parseFloat(cost),
+        cost: parseFloat(cost) || 0,
         notes: notes || null,
         user_id: userId,
-        media_urls: mediaUrls, // Store media URLs
+        media_urls: mediaUrls,
       };
 
       const { error } = await supabase.from("activities").insert(activityData);
@@ -130,13 +196,55 @@ const MainActivityScreen = () => {
       setDate("");
       setCost("");
       setNotes("");
-      setMedia([]); // Clear selected media
+      setMedia([]);
     } catch (error) {
+      console.error("Save activity error:", error.message);
       Alert.alert("Error", error.message);
     } finally {
       setLoading(false);
     }
-  };
+  }; //   if (!selectedFarm || !activityType || !date) {
+  //     Alert.alert("Validation Error", "All fields except Notes are required.");
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const { data, error: userError } = await supabase.auth.getUser();
+  //     if (userError) throw userError;
+
+  //     const userId = data?.user?.id;
+  //     if (!userId) throw new Error("User not authenticated");
+
+  //     const mediaUrls = media.length > 0 ? await uploadFiles(media) : [];
+
+  //     const activityData = {
+  //       land_id: selectedFarm,
+  //       type: activityType,
+  //       date,
+  //       cost: parseFloat(cost) || 0,
+  //       notes: notes || null,
+  //       user_id: userId,
+  //       media_urls: mediaUrls,
+  //     };
+
+  //     const { error } = await supabase.from("activities").insert(activityData);
+  //     if (error) throw error;
+
+  //     Alert.alert("Success", "Activity recorded successfully.");
+  //     setSelectedFarm("");
+  //     setActivityType("");
+  //     setDate("");
+  //     setCost("");
+  //     setNotes("");
+  //     setMedia([]);
+  //   } catch (error) {
+  //     console.error("Save activity error:", error.message);
+  //     Alert.alert("Error", error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -323,7 +431,10 @@ const MainActivityScreen = () => {
       component: (
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleSaveActivity}
+          onPress={() => {
+            handleSaveActivity();
+            // handleUpload();
+          }}
           disabled={loading}>
           <Text style={styles.buttonText}>
             {loading
