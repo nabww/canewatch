@@ -8,16 +8,23 @@ import {
   Image,
   ScrollView,
   RefreshControl,
+  Modal,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import supabase from "../../supabaseClient";
 import { useTheme } from "../../context/ThemeContext";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const FarmDetails = ({ route }) => {
   const { farmName, landId } = route.params;
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
+  const [galleryVisible, setGalleryVisible] = useState(false);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { isDarkTheme } = useTheme();
 
   const fetchActivities = async () => {
@@ -31,65 +38,62 @@ const FarmDetails = ({ route }) => {
 
       if (error) {
         console.error("Error fetching activities:", error);
-      } else {
-        console.log("Activities data fetched:", data);
-
-        // Check if data is an array
-        if (!Array.isArray(data)) {
-          console.error("Invalid data format:", data);
-          return;
-        }
-
-        // Generate signed URLs for media
-        const activitiesWithSignedUrls = await Promise.all(
-          data.map(async (activity) => {
-            if (activity.media_urls && activity.media_urls.length > 0) {
-              console.log("Processing media URLs for activity:", activity.id);
-              const signedUrls = await Promise.all(
-                activity.media_urls.map(async (url) => {
-                  try {
-                    // Extract the file path from the URL
-                    const filePath = url.split("/activity-media/")[1];
-                    if (!filePath) {
-                      console.error("Invalid file path in URL:", url);
-                      return url; // Return the original URL if the path is invalid
-                    }
-
-                    // Generate a signed URL
-                    const { signedURL, error: signedUrlError } =
-                      await supabase.storage
-                        .from("activity-media")
-                        .createSignedUrl(filePath, 3600); // 1 hour expiry
-
-                    if (signedUrlError) {
-                      console.error(
-                        "Error generating signed URL:",
-                        signedUrlError
-                      );
-                      return url; // Return the original URL if signing fails
-                    }
-
-                    console.log("Signed URL generated:", signedURL);
-                    return signedURL;
-                  } catch (err) {
-                    console.error("Error processing URL:", url, err);
-                    return url; // Return the original URL if an error occurs
-                  }
-                })
-              );
-
-              // Filter out undefined values
-              activity.media_urls = signedUrls.filter(
-                (url) => url !== undefined
-              );
-            }
-            return activity;
-          })
-        );
-
-        console.log("Activities with signed URLs:", activitiesWithSignedUrls);
-        setActivities(activitiesWithSignedUrls);
+        return;
       }
+
+      console.log("Activities data fetched:", data);
+
+      if (!Array.isArray(data)) {
+        console.error("Invalid data format:", data);
+        return;
+      }
+
+      const activitiesWithUrls = await Promise.all(
+        data.map(async (activity) => {
+          if (activity.media_urls && activity.media_urls.length > 0) {
+            console.log("Processing media URLs for activity:", activity.id);
+            const urls = await Promise.all(
+              activity.media_urls.map(async (url) => {
+                try {
+                  const filePath = url.split("/activity-media-new/")[1];
+                  console.log("Extracted file path:", filePath);
+
+                  if (!filePath) {
+                    console.error("Invalid file path in URL:", url);
+                    return url;
+                  }
+
+                  const isPublic = url.includes("/public/");
+                  if (isPublic) {
+                    const publicUrl = `https://hogsimoijismoxjqrimw.supabase.co/storage/v1/object/public/activity-media-new/${filePath}`;
+                    console.log("Public URL generated:", publicUrl);
+                    return publicUrl;
+                  } else {
+                    // For private files, use Supabase signed URL
+                    const { data: signedData, error: signedError } =
+                      await supabase.storage
+                        .from("activity-media-new")
+                        .createSignedUrl(filePath, 60); // URL valid for 60 seconds
+                    if (signedError) {
+                      console.error("Error creating signed URL:", signedError);
+                      return url;
+                    }
+                    return signedData.signedUrl;
+                  }
+                } catch (err) {
+                  console.error("Error processing URL:", url, err);
+                  return url;
+                }
+              })
+            );
+            activity.media_urls = urls.filter((url) => url !== undefined);
+          }
+          return activity;
+        })
+      );
+
+      console.log("Activities with URLs:", activitiesWithUrls);
+      setActivities(activitiesWithUrls);
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
@@ -106,6 +110,16 @@ const FarmDetails = ({ route }) => {
   const handleRefresh = () => {
     setRefreshing(true);
     fetchActivities();
+  };
+
+  const openGallery = (mediaUrls, index) => {
+    setSelectedImages(mediaUrls);
+    setCurrentImageIndex(index);
+    setGalleryVisible(true);
+  };
+
+  const closeGallery = () => {
+    setGalleryVisible(false);
   };
 
   const renderActivityCard = ({ item }) => (
@@ -146,8 +160,6 @@ const FarmDetails = ({ route }) => {
         ]}>
         Cost: {item.cost ? `KES ${item.cost}` : "N/A"}
       </Text>
-
-      {/* Media Section */}
       <Text
         style={[
           styles.mediaLabel,
@@ -158,16 +170,23 @@ const FarmDetails = ({ route }) => {
       {item.media_urls && item.media_urls.length > 0 ? (
         <ScrollView horizontal style={styles.mediaContainer}>
           {item.media_urls.map((url, index) => (
-            <Image
+            <TouchableOpacity
               key={index}
-              source={{ uri: url }}
-              style={styles.mediaImage}
-              resizeMode="cover"
-              onError={(error) => {
-                console.error("Image loading error:", error.nativeEvent.error);
-                console.error("Failed URL:", url);
-              }}
-            />
+              onPress={() => openGallery(item.media_urls, index)}>
+              <Image
+                source={{ uri: url }}
+                style={styles.mediaImage}
+                resizeMode="cover"
+                onError={(error) => {
+                  console.error(
+                    "Image loading error:",
+                    error.nativeEvent.error,
+                    "URL:",
+                    url
+                  );
+                }}
+              />
+            </TouchableOpacity>
           ))}
         </ScrollView>
       ) : (
@@ -180,6 +199,36 @@ const FarmDetails = ({ route }) => {
         </Text>
       )}
     </View>
+  );
+
+  const renderGallery = () => (
+    <Modal visible={galleryVisible} transparent={true} animationType="fade">
+      <View style={styles.galleryContainer}>
+        <TouchableOpacity style={styles.closeButton} onPress={closeGallery}>
+          <Text style={styles.closeButtonText}>X</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={selectedImages}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          initialScrollIndex={currentImageIndex}
+          getItemLayout={(data, index) => ({
+            length: SCREEN_WIDTH,
+            offset: SCREEN_WIDTH * index,
+            index,
+          })}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <Image
+              source={{ uri: item }}
+              style={styles.galleryImage}
+              resizeMode="contain"
+            />
+          )}
+        />
+      </View>
+    </Modal>
   );
 
   return (
@@ -216,6 +265,7 @@ const FarmDetails = ({ route }) => {
           No activities available.
         </Text>
       )}
+      {renderGallery()}
     </View>
   );
 };
@@ -243,65 +293,46 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  darkCard: {
-    backgroundColor: "#333333",
-  },
-  lightCard: {
-    backgroundColor: "#ffffff",
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  cardDate: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  cardNotes: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  cardCost: {
-    fontSize: 16,
-  },
-  noActivitiesText: {
-    fontSize: 18,
-    textAlign: "center",
-    marginTop: 20,
-  },
+  darkCard: { backgroundColor: "#333333" },
+  lightCard: { backgroundColor: "#ffffff" },
+  cardTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+  cardDate: { fontSize: 16, marginBottom: 10 },
+  cardNotes: { fontSize: 16, marginBottom: 10 },
+  cardCost: { fontSize: 16 },
+  noActivitiesText: { fontSize: 18, textAlign: "center", marginTop: 20 },
   mediaLabel: {
     fontSize: 16,
     fontWeight: "bold",
     marginTop: 10,
     marginBottom: 5,
   },
-  mediaContainer: {
-    flexDirection: "row",
-    marginBottom: 10,
+  mediaContainer: { flexDirection: "row", marginBottom: 10 },
+  mediaImage: { width: 100, height: 100, borderRadius: 8, marginRight: 10 },
+  noMediaText: { fontSize: 14, fontStyle: "italic", marginBottom: 10 },
+  darkText: { color: "#FFFFFF" },
+  lightText: { color: "#000000" },
+  darkBackground: { backgroundColor: "#000000" },
+  lightBackground: { backgroundColor: "#F9F9FB" },
+  galleryContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  mediaImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginRight: 10,
+  galleryImage: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.8,
   },
-  noMediaText: {
-    fontSize: 14,
-    fontStyle: "italic",
-    marginBottom: 10,
+  closeButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1,
   },
-  darkText: {
+  closeButtonText: {
     color: "#FFFFFF",
-  },
-  lightText: {
-    color: "#000000",
-  },
-  darkBackground: {
-    backgroundColor: "#000000",
-  },
-  lightBackground: {
-    backgroundColor: "#F9F9FB",
+    fontSize: 24,
+    fontWeight: "bold",
   },
 });
 
