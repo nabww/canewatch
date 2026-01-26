@@ -1,0 +1,9 @@
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\deps\rand_core-3979e6344dc97787.d: C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\lib.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\block.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\utils.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\word.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\../README.md
+
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\deps\librand_core-3979e6344dc97787.rmeta: C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\lib.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\block.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\utils.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\word.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\../README.md
+
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\lib.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\block.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\utils.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\word.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\rand_core-0.10.0-rc-6\src\../README.md:

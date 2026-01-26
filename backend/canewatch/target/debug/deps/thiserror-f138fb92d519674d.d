@@ -1,0 +1,12 @@
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\deps\thiserror-f138fb92d519674d.d: C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\build\thiserror-c942eee0367b3c29\out/private.rs
+
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\deps\libthiserror-f138fb92d519674d.rmeta: C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\build\thiserror-c942eee0367b3c29\out/private.rs
+
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\lib.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\aserror.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\display.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\var.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\thiserror-2.0.18\src\private.rs:
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\build\thiserror-c942eee0367b3c29\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\nwambulwa\\Documents\\canewatch\\backend\\canewatch\\target\\debug\\build\\thiserror-c942eee0367b3c29\\out

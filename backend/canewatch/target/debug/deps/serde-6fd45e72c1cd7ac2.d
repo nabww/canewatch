@@ -1,0 +1,12 @@
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\deps\serde-6fd45e72c1cd7ac2.d: C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\build\serde-4f468e92326fa855\out/private.rs
+
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\deps\libserde-6fd45e72c1cd7ac2.rmeta: C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\build\serde-4f468e92326fa855\out/private.rs
+
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\nwambulwa\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+C:\Users\nwambulwa\Documents\canewatch\backend\canewatch\target\debug\build\serde-4f468e92326fa855\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\nwambulwa\\Documents\\canewatch\\backend\\canewatch\\target\\debug\\build\\serde-4f468e92326fa855\\out
