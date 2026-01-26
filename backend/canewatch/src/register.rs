@@ -1,20 +1,22 @@
 use axum::{extract::State, Json};
 use sqlx::MySqlPool;
 use uuid::Uuid;
+use crate::auth::{RegisterRequest, AuthResponse};
+use crate::hashing::hash_password;
+use crate::jwt::create_jwt;
 
 pub async fn register(
     State(pool): State<MySqlPool>,
     Json(payload): Json<RegisterRequest>,
 ) -> Json<AuthResponse> {
     let user_id = Uuid::new_v4();
-    let hash = hash_password(&payload.password);
+    let hashed = hash_password(&payload.password);
 
     sqlx::query!(
-        "INSERT INTO users (id, email, password_hash, username)
-         VALUES (UUID_TO_BIN(?), ?, ?, ?)",
+        "INSERT INTO users (id, email, password_hash, username) VALUES (UUID_TO_BIN(?), ?, ?, ?)",
         user_id.to_string(),
         payload.email,
-        hash,
+        hashed,
         payload.username
     )
         .execute(&pool)

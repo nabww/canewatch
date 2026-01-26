@@ -1,5 +1,4 @@
-use axum::extract::State;
-use axum::Json;
+use axum::{extract::State, Json};
 use sqlx::MySqlPool;
 use crate::auth::{AuthResponse, LoginRequest};
 use crate::hashing::verify_password;
