@@ -20,6 +20,7 @@ Features
 #### **Backend:**
 - Supabase: A backend-as-a-service platform for authentication, storage, and database queries.
 - PostgreSQL: A powerful, open-source relational database system.
+- Migrating to a Rust backend for scalability and cost cutting
 ## **Getting Started**
 ### **Prerequisites:**
 - Node.js: Required to run the project.
